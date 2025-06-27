@@ -62,31 +62,30 @@ class PlayerBox extends StatelessWidget {
 
   Widget _buildPlayerInfo(BuildContext context) {
     bool isPlayerTurn = _isPlayerTurn();
+    bool hasPerfectStreak = _hasPerfectStreak();
+    bool hasImmaculateStreak = _hasImmaculateStreak();
 
     return Container(
       padding: const EdgeInsets.all(8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Player name with strike-through if perfect streak broken
+          // Player name with perfect streak effects
           Text(
             player.name,
             style: TextStyle(
-              color: isPlayerTurn ? Colors.yellow : Colors.white,
+              color: _getPlayerNameColor(
+                isPlayerTurn,
+                hasPerfectStreak,
+                hasImmaculateStreak,
+              ),
               fontWeight: FontWeight.bold,
-              decoration:
-                  player.hasBrokenPerfectStreak
-                      ? TextDecoration.lineThrough
-                      : null,
-              shadows:
-                  isPlayerTurn
-                      ? [
-                        Shadow(
-                          color: Colors.yellow.withValues(alpha: 0.8),
-                          blurRadius: 4,
-                        ),
-                      ]
-                      : null,
+              fontSize: hasPerfectStreak || hasImmaculateStreak ? 16 : 14,
+              shadows: _getPlayerNameShadows(
+                isPlayerTurn,
+                hasPerfectStreak,
+                hasImmaculateStreak,
+              ),
             ),
           ),
 
@@ -132,6 +131,34 @@ class PlayerBox extends StatelessWidget {
             ],
           ),
 
+          // Perfect streak indicator
+          if (hasPerfectStreak || hasImmaculateStreak) ...[
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: hasImmaculateStreak ? Colors.purple : Colors.amber,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: (hasImmaculateStreak ? Colors.purple : Colors.amber)
+                        .withValues(alpha: 0.6),
+                    blurRadius: 4,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: Text(
+                hasImmaculateStreak ? 'IMMACULATE' : 'PERFECT',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+
           // Turn indicator
           if (isPlayerTurn) ...[
             const SizedBox(height: 4),
@@ -154,6 +181,64 @@ class PlayerBox extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Color _getPlayerNameColor(
+    bool isPlayerTurn,
+    bool hasPerfectStreak,
+    bool hasImmaculateStreak,
+  ) {
+    if (hasImmaculateStreak) return Colors.purple;
+    if (hasPerfectStreak) return Colors.amber;
+    if (isPlayerTurn) return Colors.yellow;
+    return Colors.white;
+  }
+
+  List<Shadow>? _getPlayerNameShadows(
+    bool isPlayerTurn,
+    bool hasPerfectStreak,
+    bool hasImmaculateStreak,
+  ) {
+    if (hasImmaculateStreak) {
+      return [
+        Shadow(color: Colors.purple.withValues(alpha: 0.8), blurRadius: 8),
+        Shadow(color: Colors.white.withValues(alpha: 0.6), blurRadius: 4),
+      ];
+    }
+    if (hasPerfectStreak) {
+      return [
+        Shadow(color: Colors.amber.withValues(alpha: 0.8), blurRadius: 6),
+        Shadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 3),
+      ];
+    }
+    if (isPlayerTurn) {
+      return [
+        Shadow(color: Colors.yellow.withValues(alpha: 0.8), blurRadius: 4),
+      ];
+    }
+    return null;
+  }
+
+  bool _hasPerfectStreak() {
+    if (player.perfectRounds.isEmpty) return false;
+
+    // Count how many perfect rounds the player has
+    int perfectRoundsCount =
+        player.perfectRounds.where((perfect) => perfect).length;
+
+    // Show perfect streak if they have at least 3 consecutive perfect rounds
+    return perfectRoundsCount >= 3;
+  }
+
+  bool _hasImmaculateStreak() {
+    if (player.immaculateRounds.isEmpty) return false;
+
+    // Count how many immaculate rounds the player has
+    int immaculateRoundsCount =
+        player.immaculateRounds.where((immaculate) => immaculate).length;
+
+    // Show immaculate streak if they have at least 2 consecutive immaculate rounds
+    return immaculateRoundsCount >= 2;
   }
 
   Widget _buildPlayerHand(BuildContext context) {
