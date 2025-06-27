@@ -1,12 +1,35 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:confetti/confetti.dart';
 import '../providers/game_state.dart';
 import '../widgets/player_box.dart';
 import '../widgets/bid_input_widget.dart';
 import '../constants/game_constants.dart';
 
-class GameScreen extends StatelessWidget {
+class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
+
+  @override
+  State<GameScreen> createState() => _GameScreenState();
+}
+
+class _GameScreenState extends State<GameScreen> {
+  late ConfettiController _confettiController;
+
+  @override
+  void initState() {
+    super.initState();
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 5),
+    );
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -248,78 +271,116 @@ class GameScreen extends StatelessWidget {
   }
 
   Widget _buildGameCompleteScreen(BuildContext context, GameState gameState) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Game Complete!',
-            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+    // Trigger confetti when the screen appears
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _confettiController.play();
+      }
+    });
 
-          const SizedBox(height: 20),
+    return Stack(
+      children: [
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Game Complete!',
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
 
-          Text(
-            'Winner: ${gameState.getWinner().name}',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: Colors.yellow,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+              const SizedBox(height: 20),
 
-          const SizedBox(height: 30),
+              Text(
+                'Winner: ${gameState.getWinner().name}',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: Colors.yellow,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
 
-          // Final scores
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children:
-                  gameState.players
-                      .map(
-                        (player) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                player.name,
-                                style: const TextStyle(color: Colors.white),
+              const SizedBox(height: 30),
+
+              // Final scores
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children:
+                      gameState.players
+                          .map(
+                            (player) => Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    player.name,
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                  Text(
+                                    'Score: ${player.score}',
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                'Score: ${player.score}',
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                      .toList(),
-            ),
-          ),
+                            ),
+                          )
+                          .toList(),
+                ),
+              ),
 
-          const SizedBox(height: 30),
+              const SizedBox(height: 30),
 
-          ElevatedButton(
-            onPressed: () => gameState.startNewGame(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: Color(GameConstants.greenFeltColor),
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-            ),
-            child: const Text(
-              'Play Again',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+              ElevatedButton(
+                onPressed: () => gameState.startNewGame(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Color(GameConstants.greenFeltColor),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 15,
+                  ),
+                ),
+                child: const Text(
+                  'Play Again',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+
+        // Confetti effect
+        Align(
+          alignment: Alignment.topCenter,
+          child: ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirection: pi / 2, // Straight down
+            maxBlastForce: 5,
+            minBlastForce: 2,
+            emissionFrequency: 0.05,
+            numberOfParticles: 50,
+            gravity: 0.1,
+            colors: const [
+              Colors.green,
+              Colors.blue,
+              Colors.pink,
+              Colors.orange,
+              Colors.purple,
+              Colors.red,
+              Colors.yellow,
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
