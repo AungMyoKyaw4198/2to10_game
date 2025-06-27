@@ -89,17 +89,17 @@ class GameScreen extends StatelessWidget {
             flex: 3,
             child: Row(
               children: [
-                // Left player
+                // Left player (now player 3)
                 Expanded(
                   flex: 2,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: PlayerBox(
-                      player: gameState.players[2],
+                      player: gameState.players[3],
                       position: 'left',
-                      playerIndex: 2,
+                      playerIndex: 3,
                       currentRound: gameState.currentRound,
-                      onCardPlayed: (card) => gameState.playCard(2, card),
+                      onCardPlayed: (card) => gameState.playCard(3, card),
                     ),
                   ),
                 ),
@@ -110,7 +110,7 @@ class GameScreen extends StatelessWidget {
                   child: _buildCenterGameArea(context, gameState),
                 ),
 
-                // Right player
+                // Right player (now player 1)
                 Expanded(
                   flex: 2,
                   child: Padding(
@@ -128,17 +128,17 @@ class GameScreen extends StatelessWidget {
             ),
           ),
 
-          // Bottom player
+          // Bottom player (now player 2)
           Expanded(
             flex: 2,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: PlayerBox(
-                player: gameState.players[3],
+                player: gameState.players[2],
                 position: 'bottom',
-                playerIndex: 3,
+                playerIndex: 2,
                 currentRound: gameState.currentRound,
-                onCardPlayed: (card) => gameState.playCard(3, card),
+                onCardPlayed: (card) => gameState.playCard(2, card),
               ),
             ),
           ),
