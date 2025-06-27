@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:confetti/confetti.dart';
 import '../providers/game_state.dart';
+import '../models/player.dart';
 import '../widgets/player_box.dart';
 import '../widgets/bid_input_widget.dart';
 import '../constants/game_constants.dart';
@@ -81,6 +82,19 @@ class _GameScreenState extends State<GameScreen> {
             child: const Text(
               'Start New Game',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () => _showGameCompletePreview(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+            ),
+            child: const Text(
+              'Preview Summary Screen',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -351,6 +365,236 @@ class _GameScreenState extends State<GameScreen> {
                 ),
                 child: const Text(
                   'Play Again',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Confetti effect
+        Align(
+          alignment: Alignment.topCenter,
+          child: ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirection: pi / 2, // Straight down
+            maxBlastForce: 5,
+            minBlastForce: 2,
+            emissionFrequency: 0.05,
+            numberOfParticles: 50,
+            gravity: 0.1,
+            colors: const [
+              Colors.green,
+              Colors.blue,
+              Colors.pink,
+              Colors.orange,
+              Colors.purple,
+              Colors.red,
+              Colors.yellow,
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showGameCompletePreview(BuildContext context) {
+    // Show the preview screen
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder:
+            (context) => Scaffold(
+              backgroundColor: Color(GameConstants.greenFeltColor),
+              body: _buildGameCompletePreviewScreen(context),
+            ),
+      ),
+    );
+  }
+
+  Widget _buildGameCompletePreviewScreen(BuildContext context) {
+    // Trigger confetti when the screen appears
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _confettiController.play();
+      }
+    });
+
+    // Create dummy player data
+    final dummyPlayers = [
+      Player(
+        name: 'Player 1',
+        score: 85,
+        bags: 2,
+        currentBid: 3,
+        tricksWon: 3,
+        perfectRounds: [
+          true,
+          true,
+          false,
+          true,
+          false,
+          true,
+          true,
+          false,
+          true,
+        ],
+        immaculateRounds: [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+        ],
+      ),
+      Player(
+        name: 'Player 2',
+        score: 120,
+        bags: 0,
+        currentBid: 4,
+        tricksWon: 4,
+        perfectRounds: [true, true, true, true, true, true, true, true, true],
+        immaculateRounds: [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+        ],
+      ),
+      Player(
+        name: 'Player 3',
+        score: 45,
+        bags: 7,
+        currentBid: 2,
+        tricksWon: 2,
+        perfectRounds: [
+          false,
+          false,
+          true,
+          false,
+          false,
+          false,
+          true,
+          false,
+          false,
+        ],
+        immaculateRounds: [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+        ],
+      ),
+      Player(
+        name: 'Player 4',
+        score: 95,
+        bags: 1,
+        currentBid: 5,
+        tricksWon: 5,
+        perfectRounds: [true, false, true, true, true, false, true, true, true],
+        immaculateRounds: [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+        ],
+      ),
+    ];
+
+    // Find the winner (Player 2 with highest score)
+    final winner = dummyPlayers.reduce((a, b) => a.score > b.score ? a : b);
+
+    return Stack(
+      children: [
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Game Complete!',
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              Text(
+                'Winner: ${winner.name}',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: Colors.yellow,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              // Final scores
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children:
+                      dummyPlayers
+                          .map(
+                            (player) => Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    player.name,
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                  Text(
+                                    'Score: ${player.score}',
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Color(GameConstants.greenFeltColor),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 15,
+                  ),
+                ),
+                child: const Text(
+                  'Back to Menu',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
