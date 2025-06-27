@@ -32,56 +32,12 @@ class PlayerBox extends StatelessWidget {
   }
 
   Widget _buildPlayerContent(BuildContext context) {
-    switch (position) {
-      case 'top':
-        return _buildTopPlayer(context);
-      case 'bottom':
-        return _buildBottomPlayer(context);
-      case 'left':
-        return _buildLeftPlayer(context);
-      case 'right':
-        return _buildRightPlayer(context);
-      default:
-        return _buildTopPlayer(context);
-    }
-  }
-
-  Widget _buildTopPlayer(BuildContext context) {
+    // All players now use the same layout with cards at the bottom
     return Column(
       children: [
         _buildPlayerInfo(context),
         const SizedBox(height: 8),
         _buildPlayerHand(context),
-      ],
-    );
-  }
-
-  Widget _buildBottomPlayer(BuildContext context) {
-    return Column(
-      children: [
-        _buildPlayerHand(context),
-        const SizedBox(height: 8),
-        _buildPlayerInfo(context),
-      ],
-    );
-  }
-
-  Widget _buildLeftPlayer(BuildContext context) {
-    return Row(
-      children: [
-        _buildPlayerInfo(context),
-        const SizedBox(width: 8),
-        Expanded(child: _buildPlayerHand(context)),
-      ],
-    );
-  }
-
-  Widget _buildRightPlayer(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(child: _buildPlayerHand(context)),
-        const SizedBox(width: 8),
-        _buildPlayerInfo(context),
       ],
     );
   }
