@@ -61,6 +61,9 @@ class GameState extends ChangeNotifier {
       return;
     }
 
+    // Reset player bids and tricks for the new round
+    _resetPlayerRoundData();
+
     // Deal cards for the current round
     List<List<Card>> playerHands = _dealCards(_currentRoundNumber);
 
@@ -76,6 +79,16 @@ class GameState extends ChangeNotifier {
 
     _saveGameState();
     notifyListeners();
+  }
+
+  // Reset player bids and tricks for a new round
+  void _resetPlayerRoundData() {
+    for (int i = 0; i < _players.length; i++) {
+      _players[i] = _players[i].copyWith(
+        currentBid: -1, // Reset to -1 to indicate "not bid yet"
+        tricksWon: 0, // Reset tricks won for the new round
+      );
+    }
   }
 
   // Deal cards to players

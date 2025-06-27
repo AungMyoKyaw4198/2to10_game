@@ -93,7 +93,7 @@ class PlayerBox extends StatelessWidget {
 
           // Bid
           Text(
-            'Bid: ${player.currentBid}',
+            player.currentBid >= 0 ? 'Bid: ${player.currentBid}' : 'Not Bid',
             style: TextStyle(
               color: isPlayerTurn ? Colors.yellow : Colors.white70,
               fontSize: 12,

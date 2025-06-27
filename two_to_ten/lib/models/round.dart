@@ -21,7 +21,9 @@ class Round {
     this.isComplete = false,
   }) : currentTrick = currentTrick ?? [],
        trickWinners = trickWinners ?? [],
-       bids = bids ?? List.filled(4, 0);
+       bids =
+           bids ??
+           List.filled(4, -1); // Initialize as -1 to indicate "not bid yet"
 
   // Get the number of cards per player for this round
   int get cardsPerPlayer => roundNumber;
