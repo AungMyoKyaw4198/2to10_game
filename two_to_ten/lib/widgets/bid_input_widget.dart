@@ -37,6 +37,12 @@ class _BidInputWidgetState extends State<BidInputWidget> {
     }
   }
 
+  @override
+  void dispose() {
+    _dialogShown = false; // Reset flag on dispose
+    super.dispose();
+  }
+
   void _findNextPlayerToBid() {
     for (int i = 0; i < widget.currentRound.bids.length; i++) {
       if (widget.currentRound.bids[i] < 0) {
@@ -59,10 +65,13 @@ class _BidInputWidgetState extends State<BidInputWidget> {
       return const SizedBox.shrink(); // Hide widget if all bids are placed
     }
 
-    // Show dialog for bidding only if not already shown
-    if (!_dialogShown) {
+    // Show dialog for bidding only if not already shown and widget is mounted
+    if (!_dialogShown && mounted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showBidDialog(context);
+        // Double-check that we still need to show the dialog
+        if (mounted && widget.currentRound.bids.any((bid) => bid < 0)) {
+          _showBidDialog(context);
+        }
       });
     }
 
@@ -214,17 +223,26 @@ class _BidInputWidgetState extends State<BidInputWidget> {
                     child: ElevatedButton(
                       onPressed: () {
                         widget.onBidSubmitted(_currentPlayerIndex, _currentBid);
-                        setState(() {
-                          _currentBid = 0;
-                        });
-                        _findNextPlayerToBid();
+
+                        // Check if widget is still mounted before calling setState
+                        if (mounted) {
+                          setState(() {
+                            _currentBid = 0;
+                          });
+                          _findNextPlayerToBid();
+                        }
+
                         Navigator.of(context).pop();
 
                         // Show next player's dialog if there are more bids to place
-                        if (widget.currentRound.bids.any((bid) => bid < 0)) {
+                        if (mounted &&
+                            widget.currentRound.bids.any((bid) => bid < 0)) {
                           _dialogShown = false; // Reset flag for next player
                           WidgetsBinding.instance.addPostFrameCallback((_) {
-                            _showBidDialog(context);
+                            // Check again if widget is still mounted before showing dialog
+                            if (mounted) {
+                              _showBidDialog(context);
+                            }
                           });
                         }
                       },
