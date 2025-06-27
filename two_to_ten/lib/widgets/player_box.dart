@@ -55,6 +55,7 @@ class PlayerBox extends StatelessWidget {
       children: [
         _buildPlayerInfo(context),
         const SizedBox(height: 8),
+        _buildCardCount(context),
         _buildPlayerHand(context),
       ],
     );
@@ -253,16 +254,72 @@ class PlayerBox extends StatelessWidget {
     // Check if it's this player's turn to play
     bool isPlayerTurn = _isPlayerTurn();
 
+    // Determine card size and layout based on position
+    double cardWidth = 30;
+    double cardHeight = 40;
+    int maxCardsPerRow = 5;
+
+    // Adjust for left and right players to prevent overflow
+    if (position == 'left' || position == 'right') {
+      cardWidth = 20;
+      cardHeight = 28;
+      maxCardsPerRow = 4; // Fewer cards per row for side players
+    }
+
+    // Calculate dynamic height based on number of cards
+    int cardsPerRow = position == 'left' || position == 'right' ? 4 : 5;
+    int numberOfRows = (hand.length / cardsPerRow).ceil();
+    double calculatedHeight =
+        numberOfRows * (cardHeight + 1) + 8; // +1 for spacing, +8 for padding
+
+    // Set maximum height for side players
+    double maxHeight =
+        position == 'left' || position == 'right' ? 200 : double.infinity;
+    double finalHeight =
+        calculatedHeight > maxHeight ? maxHeight : calculatedHeight;
+
     return Container(
       padding: const EdgeInsets.all(4),
-      child: Wrap(
-        spacing: 2,
-        runSpacing: 2,
-        children:
-            hand
-                .map((card) => _buildCardWidget(context, card, isPlayerTurn))
-                .toList(),
-      ),
+      height: position == 'left' || position == 'right' ? finalHeight : null,
+      child:
+          finalHeight >= maxHeight &&
+                  (position == 'left' || position == 'right')
+              ? SingleChildScrollView(
+                child: Wrap(
+                  spacing: 1,
+                  runSpacing: 1,
+                  alignment: WrapAlignment.center,
+                  children:
+                      hand
+                          .map(
+                            (card) => _buildCardWidget(
+                              context,
+                              card,
+                              isPlayerTurn,
+                              cardWidth,
+                              cardHeight,
+                            ),
+                          )
+                          .toList(),
+                ),
+              )
+              : Wrap(
+                spacing: 1,
+                runSpacing: 1,
+                alignment: WrapAlignment.center,
+                children:
+                    hand
+                        .map(
+                          (card) => _buildCardWidget(
+                            context,
+                            card,
+                            isPlayerTurn,
+                            cardWidth,
+                            cardHeight,
+                          ),
+                        )
+                        .toList(),
+              ),
     );
   }
 
@@ -270,14 +327,19 @@ class PlayerBox extends StatelessWidget {
     BuildContext context,
     game_card.Card card,
     bool isPlayable,
+    double cardWidth,
+    double cardHeight,
   ) {
     bool isPlayerTurn = _isPlayerTurn();
+
+    // Adjust font size based on card size
+    double fontSize = cardWidth > 25 ? 10 : 8;
 
     return GestureDetector(
       onTap: isPlayable ? () => onCardPlayed(card) : null,
       child: Container(
-        width: 30,
-        height: 40,
+        width: cardWidth,
+        height: cardHeight,
         decoration: BoxDecoration(
           color: isPlayable ? Colors.white : Colors.grey.shade300,
           borderRadius: BorderRadius.circular(4),
@@ -307,7 +369,7 @@ class PlayerBox extends StatelessWidget {
                   isPlayable && isPlayerTurn
                       ? Colors.yellow.shade800
                       : Color(card.color),
-              fontSize: 10,
+              fontSize: fontSize,
               fontWeight: FontWeight.bold,
               shadows:
                   isPlayable && isPlayerTurn
@@ -348,5 +410,27 @@ class PlayerBox extends StatelessWidget {
     int currentPlayer = (firstPlayer + currentTrickSize) % 4;
 
     return currentPlayer == playerIndex;
+  }
+
+  Widget _buildCardCount(BuildContext context) {
+    if (currentRound == null ||
+        playerIndex >= currentRound!.playerHands.length) {
+      return const SizedBox.shrink();
+    }
+
+    int cardCount = currentRound!.playerHands[playerIndex].length;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      child: Text(
+        '$cardCount cards',
+        style: TextStyle(
+          color: Colors.white70,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
   }
 }

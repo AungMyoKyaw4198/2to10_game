@@ -327,27 +327,66 @@ class _GameScreenState extends State<GameScreen> {
                 ),
                 child: Column(
                   children:
-                      gameState.players
-                          .map(
-                            (player) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                      _getRankedPlayers(gameState.players).asMap().entries.map((
+                        entry,
+                      ) {
+                        final index = entry.key;
+                        final player = entry.value;
+                        final rank = index + 1;
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
                                 children: [
+                                  // Rank indicator
+                                  Container(
+                                    width: 24,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      color: _getRankColor(rank),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '$rank',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
                                   Text(
                                     player.name,
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                  Text(
-                                    'Score: ${player.score}',
-                                    style: const TextStyle(color: Colors.white),
+                                    style: TextStyle(
+                                      color:
+                                          rank == 1
+                                              ? Colors.yellow
+                                              : Colors.white,
+                                      fontWeight:
+                                          rank == 1 ? FontWeight.bold : null,
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                          )
-                          .toList(),
+                              Text(
+                                'Score: ${player.score}',
+                                style: TextStyle(
+                                  color:
+                                      rank == 1 ? Colors.yellow : Colors.white,
+                                  fontWeight:
+                                      rank == 1 ? FontWeight.bold : null,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
                 ),
               ),
 
@@ -557,27 +596,66 @@ class _GameScreenState extends State<GameScreen> {
                 ),
                 child: Column(
                   children:
-                      dummyPlayers
-                          .map(
-                            (player) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                      _getRankedPlayers(dummyPlayers).asMap().entries.map((
+                        entry,
+                      ) {
+                        final index = entry.key;
+                        final player = entry.value;
+                        final rank = index + 1;
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
                                 children: [
+                                  // Rank indicator
+                                  Container(
+                                    width: 24,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      color: _getRankColor(rank),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '$rank',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
                                   Text(
                                     player.name,
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                  Text(
-                                    'Score: ${player.score}',
-                                    style: const TextStyle(color: Colors.white),
+                                    style: TextStyle(
+                                      color:
+                                          rank == 1
+                                              ? Colors.yellow
+                                              : Colors.white,
+                                      fontWeight:
+                                          rank == 1 ? FontWeight.bold : null,
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                          )
-                          .toList(),
+                              Text(
+                                'Score: ${player.score}',
+                                style: TextStyle(
+                                  color:
+                                      rank == 1 ? Colors.yellow : Colors.white,
+                                  fontWeight:
+                                      rank == 1 ? FontWeight.bold : null,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
                 ),
               ),
 
@@ -626,5 +704,26 @@ class _GameScreenState extends State<GameScreen> {
         ),
       ],
     );
+  }
+
+  List<Player> _getRankedPlayers(List<Player> players) {
+    // Sort players by score in descending order (highest first)
+    List<Player> sortedPlayers = List.from(players);
+    sortedPlayers.sort((a, b) => b.score.compareTo(a.score));
+    return sortedPlayers;
+  }
+
+  Color _getRankColor(int rank) {
+    // Return different colors for different ranks
+    switch (rank) {
+      case 1:
+        return Colors.amber; // Gold for 1st place
+      case 2:
+        return Colors.grey.shade400; // Silver for 2nd place
+      case 3:
+        return Colors.brown.shade300; // Bronze for 3rd place
+      default:
+        return Colors.grey.shade600; // Dark grey for 4th place
+    }
   }
 }
