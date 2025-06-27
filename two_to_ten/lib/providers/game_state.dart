@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/card.dart';
 import '../models/player.dart';
 import '../models/round.dart';
@@ -24,7 +22,6 @@ class GameState extends ChangeNotifier {
 
   GameState() {
     _initializePlayers();
-    _loadGameState();
   }
 
   // Initialize players with default names
@@ -47,7 +44,6 @@ class GameState extends ChangeNotifier {
     }
 
     _startNewRound();
-    _saveGameState();
     notifyListeners();
   }
 
@@ -56,7 +52,6 @@ class GameState extends ChangeNotifier {
     if (_currentRoundNumber > GameConstants.maxRound) {
       _isGameComplete = true;
       _calculateFinalScores();
-      _saveGameState();
       notifyListeners();
       return;
     }
@@ -77,7 +72,6 @@ class GameState extends ChangeNotifier {
       playerHands: playerHands,
     );
 
-    _saveGameState();
     notifyListeners();
   }
 
@@ -123,7 +117,6 @@ class GameState extends ChangeNotifier {
     _currentRound = _currentRound!.setBid(playerIndex, bid);
     _players[playerIndex] = _players[playerIndex].copyWith(currentBid: bid);
 
-    _saveGameState();
     notifyListeners();
   }
 
@@ -144,7 +137,6 @@ class GameState extends ChangeNotifier {
       );
     }
 
-    _saveGameState();
     notifyListeners();
   }
 
@@ -260,69 +252,5 @@ class GameState extends ChangeNotifier {
     }
 
     return winner;
-  }
-
-  // Save game state to SharedPreferences
-  Future<void> _saveGameState() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-
-      Map<String, dynamic> gameData = {
-        'players': _players.map((p) => p.toJson()).toList(),
-        'currentRoundNumber': _currentRoundNumber,
-        'isGameComplete': _isGameComplete,
-        'isGameStarted': _isGameStarted,
-        'currentRound': _currentRound?.toJson(),
-      };
-
-      await prefs.setString('game_state', jsonEncode(gameData));
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error saving game state: $e');
-      }
-    }
-  }
-
-  // Load game state from SharedPreferences
-  Future<void> _loadGameState() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final gameStateString = prefs.getString('game_state');
-
-      if (gameStateString != null) {
-        Map<String, dynamic> gameData = jsonDecode(gameStateString);
-
-        _players =
-            (gameData['players'] as List)
-                .map((p) => Player.fromJson(p))
-                .toList();
-
-        _currentRoundNumber = gameData['currentRoundNumber'] as int;
-        _isGameComplete = gameData['isGameComplete'] as bool;
-        _isGameStarted = gameData['isGameStarted'] as bool;
-
-        if (gameData['currentRound'] != null) {
-          _currentRound = Round.fromJson(gameData['currentRound']);
-        }
-
-        notifyListeners();
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error loading game state: $e');
-      }
-    }
-  }
-
-  // Clear saved game state
-  Future<void> clearSavedGame() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('game_state');
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error clearing game state: $e');
-      }
-    }
   }
 }
