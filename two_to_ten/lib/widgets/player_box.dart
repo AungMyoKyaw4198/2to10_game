@@ -21,11 +21,29 @@ class PlayerBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isPlayerTurn = _isPlayerTurn();
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+        border: Border.all(
+          color:
+              isPlayerTurn
+                  ? Colors.yellow
+                  : Colors.white.withValues(alpha: 0.3),
+          width: isPlayerTurn ? 2 : 1,
+        ),
+        boxShadow:
+            isPlayerTurn
+                ? [
+                  BoxShadow(
+                    color: Colors.yellow.withValues(alpha: 0.5),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  ),
+                ]
+                : null,
       ),
       child: _buildPlayerContent(context),
     );
@@ -43,6 +61,8 @@ class PlayerBox extends StatelessWidget {
   }
 
   Widget _buildPlayerInfo(BuildContext context) {
+    bool isPlayerTurn = _isPlayerTurn();
+
     return Container(
       padding: const EdgeInsets.all(8),
       child: Column(
@@ -52,11 +72,20 @@ class PlayerBox extends StatelessWidget {
           Text(
             player.name,
             style: TextStyle(
-              color: Colors.white,
+              color: isPlayerTurn ? Colors.yellow : Colors.white,
               fontWeight: FontWeight.bold,
               decoration:
                   player.hasBrokenPerfectStreak
                       ? TextDecoration.lineThrough
+                      : null,
+              shadows:
+                  isPlayerTurn
+                      ? [
+                        Shadow(
+                          color: Colors.yellow.withValues(alpha: 0.8),
+                          blurRadius: 4,
+                        ),
+                      ]
                       : null,
             ),
           ),
@@ -66,13 +95,19 @@ class PlayerBox extends StatelessWidget {
           // Bid
           Text(
             'Bid: ${player.currentBid}',
-            style: const TextStyle(color: Colors.white70, fontSize: 12),
+            style: TextStyle(
+              color: isPlayerTurn ? Colors.yellow : Colors.white70,
+              fontSize: 12,
+            ),
           ),
 
           // Score
           Text(
             'Score: ${player.score}',
-            style: const TextStyle(color: Colors.white70, fontSize: 12),
+            style: TextStyle(
+              color: isPlayerTurn ? Colors.yellow : Colors.white70,
+              fontSize: 12,
+            ),
           ),
 
           // Bags with warning
@@ -82,7 +117,10 @@ class PlayerBox extends StatelessWidget {
               Text(
                 'Bags: ${player.bags}',
                 style: TextStyle(
-                  color: player.hasBagWarning ? Colors.red : Colors.white70,
+                  color:
+                      player.hasBagWarning
+                          ? Colors.red
+                          : (isPlayerTurn ? Colors.yellow : Colors.white70),
                   fontSize: 12,
                   fontWeight: player.hasBagWarning ? FontWeight.bold : null,
                 ),
@@ -93,6 +131,26 @@ class PlayerBox extends StatelessWidget {
               ],
             ],
           ),
+
+          // Turn indicator
+          if (isPlayerTurn) ...[
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.yellow,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text(
+                'YOUR TURN',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -128,6 +186,8 @@ class PlayerBox extends StatelessWidget {
     game_card.Card card,
     bool isPlayable,
   ) {
+    bool isPlayerTurn = _isPlayerTurn();
+
     return GestureDetector(
       onTap: isPlayable ? () => onCardPlayed(card) : null,
       child: Container(
@@ -137,17 +197,42 @@ class PlayerBox extends StatelessWidget {
           color: isPlayable ? Colors.white : Colors.grey.shade300,
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
-            color: isPlayable ? Color(card.color) : Colors.grey,
-            width: 1,
+            color:
+                isPlayable
+                    ? (isPlayerTurn ? Colors.yellow : Color(card.color))
+                    : Colors.grey,
+            width: isPlayable && isPlayerTurn ? 2 : 1,
           ),
+          boxShadow:
+              isPlayable && isPlayerTurn
+                  ? [
+                    BoxShadow(
+                      color: Colors.yellow.withValues(alpha: 0.6),
+                      blurRadius: 6,
+                      spreadRadius: 1,
+                    ),
+                  ]
+                  : null,
         ),
         child: Center(
           child: Text(
             card.displayString,
             style: TextStyle(
-              color: Color(card.color),
+              color:
+                  isPlayable && isPlayerTurn
+                      ? Colors.yellow.shade800
+                      : Color(card.color),
               fontSize: 10,
               fontWeight: FontWeight.bold,
+              shadows:
+                  isPlayable && isPlayerTurn
+                      ? [
+                        Shadow(
+                          color: Colors.yellow.withValues(alpha: 0.5),
+                          blurRadius: 2,
+                        ),
+                      ]
+                      : null,
             ),
           ),
         ),
