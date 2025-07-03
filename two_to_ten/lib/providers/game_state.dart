@@ -124,20 +124,38 @@ class GameState extends ChangeNotifier {
   void playCard(int playerIndex, Card card) {
     if (_currentRound == null) return;
 
-    _currentRound = _currentRound!.addCardToTrick(card, playerIndex);
+    try {
+      _currentRound = _currentRound!.addCardToTrick(card, playerIndex);
 
-    // If trick is complete, determine winner and update player stats
-    if (_currentRound!.isCurrentTrickComplete) {
-      _currentRound = _currentRound!.completeCurrentTrick();
+      // If trick is complete, determine winner and update player stats
+      if (_currentRound!.isCurrentTrickComplete) {
+        _currentRound = _currentRound!.completeCurrentTrick();
 
-      // Update trick count for the winner
-      int winnerIndex = _currentRound!.trickWinners.last;
-      _players[winnerIndex] = _players[winnerIndex].copyWith(
-        tricksWon: _players[winnerIndex].tricksWon + 1,
-      );
+        // Update trick count for the winner
+        int winnerIndex = _currentRound!.trickWinners.last;
+        _players[winnerIndex] = _players[winnerIndex].copyWith(
+          tricksWon: _players[winnerIndex].tricksWon + 1,
+        );
+      }
+
+      notifyListeners();
+    } catch (e) {
+      // Handle invalid card play - could show error message to user
+      print('Invalid card play: $e');
+      // For now, just ignore the invalid play
     }
+  }
 
-    notifyListeners();
+  // Get valid cards that a player can play
+  List<Card> getValidCards(int playerIndex) {
+    if (_currentRound == null) return [];
+    return _currentRound!.getValidCards(playerIndex);
+  }
+
+  // Check if a card is valid for a player to play
+  bool isValidCardPlay(Card card, int playerIndex) {
+    if (_currentRound == null) return false;
+    return _currentRound!.isValidCardPlay(card, playerIndex);
   }
 
   // Complete the current round

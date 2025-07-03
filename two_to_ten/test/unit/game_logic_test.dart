@@ -115,7 +115,12 @@ void main() {
       final round = Round(
         roundNumber: 2,
         powerSuit: '♠',
-        playerHands: List.generate(4, (_) => []),
+        playerHands: [
+          [Card(suit: '♥', rank: 'A')], // Player 0 has hearts
+          [Card(suit: '♥', rank: 'K')], // Player 1 has hearts
+          [Card(suit: '♠', rank: '2')], // Player 2 has spades
+          [Card(suit: '♦', rank: 'Q')], // Player 3 has diamonds
+        ],
       );
 
       // Add cards to trick
@@ -137,7 +142,12 @@ void main() {
       final round = Round(
         roundNumber: 2,
         powerSuit: '♣',
-        playerHands: List.generate(4, (_) => []),
+        playerHands: [
+          [Card(suit: '♥', rank: 'A')], // Player 0 has hearts
+          [Card(suit: '♥', rank: 'K')], // Player 1 has hearts
+          [Card(suit: '♣', rank: '2')], // Player 2 has clubs
+          [Card(suit: '♦', rank: 'Q')], // Player 3 has diamonds
+        ],
       );
 
       final roundWithTrick = round
@@ -157,7 +167,12 @@ void main() {
       final round = Round(
         roundNumber: 2,
         powerSuit: '♠',
-        playerHands: List.generate(4, (_) => []),
+        playerHands: [
+          [Card(suit: '♥', rank: 'A')], // Player 0 has hearts
+          [Card(suit: '♠', rank: 'K')], // Player 1 has spades
+          [Card(suit: '♠', rank: 'A')], // Player 2 has spades
+          [Card(suit: '♦', rank: 'Q')], // Player 3 has diamonds
+        ],
       );
 
       final roundWithTrick = round
@@ -169,6 +184,251 @@ void main() {
       final completedRound = roundWithTrick.completeCurrentTrick();
       expect(completedRound.trickWinners.first, 2); // Higher power suit wins
     });
+
+    test('Follow suit rule - must follow lead suit if able', () {
+      final round = Round(
+        roundNumber: 3,
+        powerSuit: '♠',
+        playerHands: [
+          [Card(suit: '♥', rank: 'A')], // Player 0 has hearts
+          [
+            Card(suit: '♥', rank: 'K'),
+            Card(suit: '♣', rank: 'Q'),
+          ], // Player 1 has hearts and clubs
+          [Card(suit: '♦', rank: 'J')], // Player 2 has diamonds only
+          [Card(suit: '♣', rank: '10')], // Player 3 has clubs only
+        ],
+      );
+
+      // First player leads with hearts
+      final roundWithLead = round.addCardToTrick(Card(suit: '♥', rank: 'A'), 0);
+
+      // Player 1 must follow suit (hearts) - should only be able to play hearts
+      final validCardsForPlayer1 = roundWithLead.getValidCards(1);
+      expect(validCardsForPlayer1.length, 1);
+      expect(validCardsForPlayer1.first.suit, '♥');
+      expect(validCardsForPlayer1.first.rank, 'K');
+
+      // Player 2 cannot follow suit (no hearts) - should be able to play any card
+      final validCardsForPlayer2 = roundWithLead.getValidCards(2);
+      expect(validCardsForPlayer2.length, 1);
+      expect(validCardsForPlayer2.first.suit, '♦');
+
+      // Player 3 cannot follow suit (no hearts) - should be able to play any card
+      final validCardsForPlayer3 = roundWithLead.getValidCards(3);
+      expect(validCardsForPlayer3.length, 1);
+      expect(validCardsForPlayer3.first.suit, '♣');
+    });
+
+    test('Follow suit rule - first player can play any card', () {
+      final round = Round(
+        roundNumber: 3,
+        powerSuit: '♠',
+        playerHands: [
+          [
+            Card(suit: '♥', rank: 'A'),
+            Card(suit: '♣', rank: 'K'),
+          ], // Player 0 has multiple suits
+          [Card(suit: '♥', rank: 'K')],
+          [Card(suit: '♦', rank: 'J')],
+          [Card(suit: '♣', rank: '10')],
+        ],
+      );
+
+      // First player can play any card
+      final validCardsForPlayer0 = round.getValidCards(0);
+      expect(validCardsForPlayer0.length, 2);
+      expect(validCardsForPlayer0.any((card) => card.suit == '♥'), true);
+      expect(validCardsForPlayer0.any((card) => card.suit == '♣'), true);
+    });
+
+    test('Follow suit rule - invalid card play throws error', () {
+      final round = Round(
+        roundNumber: 3,
+        powerSuit: '♠',
+        playerHands: [
+          [Card(suit: '♥', rank: 'A')], // Player 0 leads with hearts
+          [
+            Card(suit: '♥', rank: 'K'),
+            Card(suit: '♣', rank: 'Q'),
+          ], // Player 1 has hearts and clubs
+          [Card(suit: '♦', rank: 'J')], // Player 2 has diamonds only
+          [Card(suit: '♣', rank: '10')], // Player 3 has clubs only
+        ],
+      );
+
+      // First player leads with hearts
+      final roundWithLead = round.addCardToTrick(Card(suit: '♥', rank: 'A'), 0);
+
+      // Player 1 tries to play clubs when they have hearts (invalid)
+      expect(
+        () => roundWithLead.addCardToTrick(Card(suit: '♣', rank: 'Q'), 1),
+        throwsA(isA<ArgumentError>()),
+      );
+
+      // Player 1 plays hearts (valid)
+      final validPlay = roundWithLead.addCardToTrick(
+        Card(suit: '♥', rank: 'K'),
+        1,
+      );
+      expect(validPlay.currentTrick.length, 2);
+    });
+
+    test('Complete follow suit and trick winning rules verification', () {
+      // Test all the rules comprehensively
+      final round = Round(
+        roundNumber: 4,
+        powerSuit: '♠', // Spades is power suit
+        playerHands: [
+          [Card(suit: '♥', rank: 'A')], // Player 0: leads with hearts
+          [
+            Card(suit: '♥', rank: 'K'),
+            Card(suit: '♠', rank: '2'),
+          ], // Player 1: has hearts and power suit
+          [
+            Card(suit: '♦', rank: 'Q'),
+            Card(suit: '♠', rank: 'A'),
+          ], // Player 2: has diamonds and power suit
+          [Card(suit: '♣', rank: 'J')], // Player 3: has clubs only
+        ],
+      );
+
+      // Rule 1: First player can play any card
+      final roundWithLead = round.addCardToTrick(Card(suit: '♥', rank: 'A'), 0);
+      expect(roundWithLead.currentTrick.length, 1);
+      expect(roundWithLead.currentLeadSuit, '♥');
+
+      // Rule 2: Player 1 must follow suit (hearts) since they have hearts
+      final validCards1 = roundWithLead.getValidCards(1);
+      expect(validCards1.length, 1);
+      expect(validCards1.first.suit, '♥');
+      expect(validCards1.first.rank, 'K');
+
+      final roundWithPlayer1 = roundWithLead.addCardToTrick(
+        Card(suit: '♥', rank: 'K'),
+        1,
+      );
+
+      // Rule 3: Player 2 cannot follow suit (no hearts), so can play any card
+      final validCards2 = roundWithPlayer1.getValidCards(2);
+      expect(validCards2.length, 2); // Can play diamonds or spades
+      expect(validCards2.any((card) => card.suit == '♦'), true);
+      expect(validCards2.any((card) => card.suit == '♠'), true);
+
+      // Player 2 plays power suit (spades)
+      final roundWithPlayer2 = roundWithPlayer1.addCardToTrick(
+        Card(suit: '♠', rank: 'A'),
+        2,
+      );
+
+      // Rule 4: Player 3 cannot follow suit (no hearts), so can play any card
+      final validCards3 = roundWithPlayer2.getValidCards(3);
+      expect(validCards3.length, 1);
+      expect(validCards3.first.suit, '♣');
+
+      final roundWithPlayer3 = roundWithPlayer2.addCardToTrick(
+        Card(suit: '♣', rank: 'J'),
+        3,
+      );
+
+      // Rule 5: Determine winner - power suit should win
+      expect(roundWithPlayer3.isCurrentTrickComplete, true);
+      final completedRound = roundWithPlayer3.completeCurrentTrick();
+      expect(completedRound.trickWinners.length, 1);
+      expect(
+        completedRound.trickWinners.first,
+        2,
+      ); // Player 2 wins with power suit
+    });
+
+    test('Trick winning rules - highest lead suit wins when no power suit', () {
+      final round = Round(
+        roundNumber: 4,
+        powerSuit: '♠', // Spades is power suit
+        playerHands: [
+          [Card(suit: '♥', rank: 'A')], // Player 0: leads with hearts
+          [Card(suit: '♥', rank: 'K')], // Player 1: has hearts
+          [Card(suit: '♥', rank: 'Q')], // Player 2: has hearts
+          [Card(suit: '♦', rank: 'J')], // Player 3: has diamonds only
+        ],
+      );
+
+      // All players follow suit except player 3
+      final roundWithTrick = round
+          .addCardToTrick(Card(suit: '♥', rank: 'A'), 0) // Lead with hearts
+          .addCardToTrick(Card(suit: '♥', rank: 'K'), 1) // Follow suit
+          .addCardToTrick(Card(suit: '♥', rank: 'Q'), 2) // Follow suit
+          .addCardToTrick(Card(suit: '♦', rank: 'J'), 3); // Cannot follow suit
+
+      // Player 0 should win with highest hearts (A > K > Q)
+      final completedRound = roundWithTrick.completeCurrentTrick();
+      expect(completedRound.trickWinners.first, 0);
+    });
+
+    test(
+      'Trick winning rules - power suit beats lead suit even if lower value',
+      () {
+        final round = Round(
+          roundNumber: 4,
+          powerSuit: '♠', // Spades is power suit
+          playerHands: [
+            [Card(suit: '♥', rank: 'A')], // Player 0: leads with hearts
+            [Card(suit: '♥', rank: 'K')], // Player 1: has hearts
+            [
+              Card(suit: '♠', rank: '2'),
+            ], // Player 2: has power suit (low value)
+            [Card(suit: '♦', rank: 'J')], // Player 3: has diamonds only
+          ],
+        );
+
+        // Player 2 plays power suit even though they could follow suit
+        final roundWithTrick = round
+            .addCardToTrick(Card(suit: '♥', rank: 'A'), 0) // Lead with hearts
+            .addCardToTrick(Card(suit: '♥', rank: 'K'), 1) // Follow suit
+            .addCardToTrick(Card(suit: '♠', rank: '2'), 2) // Play power suit
+            .addCardToTrick(
+              Card(suit: '♦', rank: 'J'),
+              3,
+            ); // Cannot follow suit
+
+        // Player 2 should win with power suit even though it's lower value than hearts
+        final completedRound = roundWithTrick.completeCurrentTrick();
+        expect(completedRound.trickWinners.first, 2);
+      },
+    );
+
+    test(
+      'Trick winning rules - highest power suit wins when multiple power suits',
+      () {
+        final round = Round(
+          roundNumber: 4,
+          powerSuit: '♠', // Spades is power suit
+          playerHands: [
+            [Card(suit: '♥', rank: 'A')], // Player 0: leads with hearts
+            [Card(suit: '♠', rank: 'K')], // Player 1: has power suit
+            [Card(suit: '♠', rank: 'A')], // Player 2: has power suit (higher)
+            [Card(suit: '♦', rank: 'J')], // Player 3: has diamonds only
+          ],
+        );
+
+        // Multiple players play power suit
+        final roundWithTrick = round
+            .addCardToTrick(Card(suit: '♥', rank: 'A'), 0) // Lead with hearts
+            .addCardToTrick(Card(suit: '♠', rank: 'K'), 1) // Play power suit
+            .addCardToTrick(
+              Card(suit: '♠', rank: 'A'),
+              2,
+            ) // Play power suit (higher)
+            .addCardToTrick(
+              Card(suit: '♦', rank: 'J'),
+              3,
+            ); // Cannot follow suit
+
+        // Player 2 should win with highest power suit (A > K)
+        final completedRound = roundWithTrick.completeCurrentTrick();
+        expect(completedRound.trickWinners.first, 2);
+      },
+    );
   });
 
   group('Game State Tests', () {
@@ -229,16 +489,28 @@ void main() {
         gameState.setPlayerBid(i, 1);
       }
 
-      // Play cards for first trick
+      // Play cards for first trick - check if cards are valid before playing
       final player0Card = gameState.currentRound!.playerHands[0][0];
       final player1Card = gameState.currentRound!.playerHands[1][0];
       final player2Card = gameState.currentRound!.playerHands[2][0];
       final player3Card = gameState.currentRound!.playerHands[3][0];
 
+      // Play first card (can be any card)
       gameState.playCard(0, player0Card);
-      gameState.playCard(1, player1Card);
-      gameState.playCard(2, player2Card);
-      gameState.playCard(3, player3Card);
+
+      // For subsequent players, check if they can follow suit
+      // If not, they can play any card
+      final validCards1 = gameState.getValidCards(1);
+      final cardToPlay1 = validCards1.isNotEmpty ? validCards1[0] : player1Card;
+      gameState.playCard(1, cardToPlay1);
+
+      final validCards2 = gameState.getValidCards(2);
+      final cardToPlay2 = validCards2.isNotEmpty ? validCards2[0] : player2Card;
+      gameState.playCard(2, cardToPlay2);
+
+      final validCards3 = gameState.getValidCards(3);
+      final cardToPlay3 = validCards3.isNotEmpty ? validCards3[0] : player3Card;
+      gameState.playCard(3, cardToPlay3);
 
       expect(gameState.currentRound!.trickWinners.length, 1);
       expect(
@@ -446,8 +718,12 @@ void main() {
         for (int trick = 0; trick < round; trick++) {
           for (int player = 0; player < 4; player++) {
             if (gameState.currentRound!.playerHands[player].isNotEmpty) {
-              final card = gameState.currentRound!.playerHands[player][0];
-              gameState.playCard(player, card);
+              // Get valid cards for this player
+              final validCards = gameState.getValidCards(player);
+              if (validCards.isNotEmpty) {
+                final card = validCards[0]; // Play the first valid card
+                gameState.playCard(player, card);
+              }
             }
           }
         }

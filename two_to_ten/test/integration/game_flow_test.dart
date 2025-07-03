@@ -36,8 +36,12 @@ void main() {
           // Each player plays their first card
           for (int player = 0; player < 4; player++) {
             if (gameState.currentRound!.playerHands[player].isNotEmpty) {
-              final card = gameState.currentRound!.playerHands[player][0];
-              gameState.playCard(player, card);
+              // Get valid cards for this player
+              final validCards = gameState.getValidCards(player);
+              if (validCards.isNotEmpty) {
+                final card = validCards[0]; // Play the first valid card
+                gameState.playCard(player, card);
+              }
             }
           }
         }
@@ -215,8 +219,12 @@ void main() {
         for (int trick = 0; trick < round; trick++) {
           for (int player = 0; player < 4; player++) {
             if (gameState.currentRound!.playerHands[player].isNotEmpty) {
-              final card = gameState.currentRound!.playerHands[player][0];
-              gameState.playCard(player, card);
+              // Get valid cards for this player
+              final validCards = gameState.getValidCards(player);
+              if (validCards.isNotEmpty) {
+                final card = validCards[0]; // Play the first valid card
+                gameState.playCard(player, card);
+              }
             }
           }
         }

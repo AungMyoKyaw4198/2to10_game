@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/card.dart' as game_card;
 import '../models/player.dart';
 import '../models/round.dart';
+import '../providers/game_state.dart';
 
 class PlayerBox extends StatelessWidget {
   final Player player;
@@ -332,6 +334,13 @@ class PlayerBox extends StatelessWidget {
   ) {
     bool isPlayerTurn = _isPlayerTurn();
 
+    // Get GameState to check if card is valid to play
+    GameState? gameState = Provider.of<GameState>(context, listen: false);
+    bool isValidCard = gameState?.isValidCardPlay(card, playerIndex) ?? false;
+
+    // Card is only playable if it's the player's turn AND the card is valid
+    bool canPlayCard = isPlayerTurn && isValidCard;
+
     // Adjust font size based on card size
     double fontSize = cardWidth > 25 ? 10 : 8;
 
@@ -339,7 +348,7 @@ class PlayerBox extends StatelessWidget {
     bool showCardBack = !isPlayerTurn;
 
     return GestureDetector(
-      onTap: isPlayable ? () => onCardPlayed(card) : null,
+      onTap: canPlayCard ? () => onCardPlayed(card) : null,
       child: Container(
         width: cardWidth,
         height: cardHeight,
@@ -349,19 +358,19 @@ class PlayerBox extends StatelessWidget {
                   ? Colors
                       .blue
                       .shade800 // Card back color
-                  : (isPlayable ? Colors.white : Colors.grey.shade300),
+                  : (canPlayCard ? Colors.white : Colors.grey.shade300),
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
             color:
                 showCardBack
                     ? Colors.blue.shade600
-                    : (isPlayable
+                    : (canPlayCard
                         ? (isPlayerTurn ? Colors.yellow : Color(card.color))
                         : Colors.grey),
-            width: isPlayable && isPlayerTurn ? 2 : 1,
+            width: canPlayCard && isPlayerTurn ? 2 : 1,
           ),
           boxShadow:
-              isPlayable && isPlayerTurn
+              canPlayCard && isPlayerTurn
                   ? [
                     BoxShadow(
                       color: Colors.yellow.withValues(alpha: 0.6),
@@ -383,13 +392,15 @@ class PlayerBox extends StatelessWidget {
                     card.displayString,
                     style: TextStyle(
                       color:
-                          isPlayable && isPlayerTurn
+                          canPlayCard && isPlayerTurn
                               ? Colors.yellow.shade800
-                              : Color(card.color),
+                              : (canPlayCard
+                                  ? Color(card.color)
+                                  : Colors.grey.shade600),
                       fontSize: fontSize,
                       fontWeight: FontWeight.bold,
                       shadows:
-                          isPlayable && isPlayerTurn
+                          canPlayCard && isPlayerTurn
                               ? [
                                 Shadow(
                                   color: Colors.yellow.withValues(alpha: 0.5),

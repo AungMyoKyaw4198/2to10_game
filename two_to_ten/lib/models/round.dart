@@ -44,8 +44,53 @@ class Round {
   String? get currentLeadSuit =>
       currentTrick.isNotEmpty ? currentTrick[0].suit : null;
 
+  // Check if a player can follow suit (has cards of the lead suit)
+  bool canFollowSuit(int playerIndex) {
+    if (currentTrick.isEmpty)
+      return true; // First card of the trick, can play anything
+
+    String leadSuit = currentTrick[0].suit;
+    List<Card> playerHand = playerHands[playerIndex];
+
+    return playerHand.any((card) => card.suit == leadSuit);
+  }
+
+  // Get valid cards that a player can play
+  List<Card> getValidCards(int playerIndex) {
+    if (currentTrick.isEmpty) {
+      // First card of the trick, can play any card
+      return List.from(playerHands[playerIndex]);
+    }
+
+    String leadSuit = currentTrick[0].suit;
+    List<Card> playerHand = playerHands[playerIndex];
+
+    // Check if player has cards of the lead suit
+    List<Card> cardsOfLeadSuit =
+        playerHand.where((card) => card.suit == leadSuit).toList();
+
+    if (cardsOfLeadSuit.isNotEmpty) {
+      // Must follow suit - only allow cards of the lead suit
+      return cardsOfLeadSuit;
+    } else {
+      // Cannot follow suit - can play any card
+      return List.from(playerHand);
+    }
+  }
+
+  // Validate if a card can be played by a player
+  bool isValidCardPlay(Card card, int playerIndex) {
+    List<Card> validCards = getValidCards(playerIndex);
+    return validCards.contains(card);
+  }
+
   // Add a card to the current trick
   Round addCardToTrick(Card card, int playerIndex) {
+    // Validate the card play
+    if (!isValidCardPlay(card, playerIndex)) {
+      throw ArgumentError('Invalid card play: $card by player $playerIndex');
+    }
+
     List<Card> newCurrentTrick = List.from(currentTrick);
     newCurrentTrick.add(card);
 
