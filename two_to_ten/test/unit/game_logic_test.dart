@@ -80,6 +80,7 @@ void main() {
         roundNumber: 5,
         powerSuit: '♠',
         playerHands: List.generate(4, (_) => []),
+        dealer: 0,
       );
 
       expect(round.roundNumber, 5);
@@ -90,6 +91,8 @@ void main() {
       expect(round.currentTrick, isEmpty);
       expect(round.trickWinners, isEmpty);
       expect(round.isComplete, false);
+      expect(round.dealer, 0);
+      expect(round.firstPlayer, 0); // Dealer starts
     });
 
     test('Bid placement and tracking', () {
@@ -97,18 +100,20 @@ void main() {
         roundNumber: 3,
         powerSuit: '♥',
         playerHands: List.generate(4, (_) => []),
+        dealer: 1,
       );
 
       expect(round.allBidsPlaced, false);
+      expect(round.firstPlayer, 1); // Dealer starts
 
       final roundWithBids = round
-          .setBid(0, 2)
-          .setBid(1, 1)
-          .setBid(2, 0)
-          .setBid(3, 3);
+          .setBid(1, 2) // Dealer starts
+          .setBid(2, 1) // Second player
+          .setBid(3, 0) // Third player
+          .setBid(0, 3); // Fourth player
 
       expect(roundWithBids.allBidsPlaced, true);
-      expect(roundWithBids.bids, [2, 1, 0, 3]);
+      expect(roundWithBids.bids, [3, 2, 1, 0]); // Bids in player order 0,1,2,3
     });
 
     test('Trick completion and winner determination', () {
@@ -121,7 +126,10 @@ void main() {
           [Card(suit: '♠', rank: '2')], // Player 2 has spades
           [Card(suit: '♦', rank: 'Q')], // Player 3 has diamonds
         ],
+        dealer: 0,
       );
+
+      expect(round.firstPlayer, 0); // Dealer starts
 
       // Add cards to trick
       final roundWithTrick = round
@@ -148,6 +156,7 @@ void main() {
           [Card(suit: '♣', rank: '2')], // Player 2 has clubs
           [Card(suit: '♦', rank: 'Q')], // Player 3 has diamonds
         ],
+        dealer: 1,
       );
 
       final roundWithTrick = round
@@ -173,6 +182,7 @@ void main() {
           [Card(suit: '♠', rank: 'A')], // Player 2 has spades
           [Card(suit: '♦', rank: 'Q')], // Player 3 has diamonds
         ],
+        dealer: 2,
       );
 
       final roundWithTrick = round
@@ -198,6 +208,7 @@ void main() {
           [Card(suit: '♦', rank: 'J')], // Player 2 has diamonds only
           [Card(suit: '♣', rank: '10')], // Player 3 has clubs only
         ],
+        dealer: 3,
       );
 
       // First player leads with hearts
@@ -220,58 +231,39 @@ void main() {
       expect(validCardsForPlayer3.first.suit, '♣');
     });
 
-    test('Follow suit rule - first player can play any card', () {
-      final round = Round(
-        roundNumber: 3,
+    test('Dealer rotation and first player determination', () {
+      // Test different dealers
+      final round1 = Round(
+        roundNumber: 2,
         powerSuit: '♠',
-        playerHands: [
-          [
-            Card(suit: '♥', rank: 'A'),
-            Card(suit: '♣', rank: 'K'),
-          ], // Player 0 has multiple suits
-          [Card(suit: '♥', rank: 'K')],
-          [Card(suit: '♦', rank: 'J')],
-          [Card(suit: '♣', rank: '10')],
-        ],
+        playerHands: List.generate(4, (_) => []),
+        dealer: 0,
       );
+      expect(round1.firstPlayer, 0); // Dealer starts
 
-      // First player can play any card
-      final validCardsForPlayer0 = round.getValidCards(0);
-      expect(validCardsForPlayer0.length, 2);
-      expect(validCardsForPlayer0.any((card) => card.suit == '♥'), true);
-      expect(validCardsForPlayer0.any((card) => card.suit == '♣'), true);
-    });
-
-    test('Follow suit rule - invalid card play throws error', () {
-      final round = Round(
-        roundNumber: 3,
+      final round2 = Round(
+        roundNumber: 2,
         powerSuit: '♠',
-        playerHands: [
-          [Card(suit: '♥', rank: 'A')], // Player 0 leads with hearts
-          [
-            Card(suit: '♥', rank: 'K'),
-            Card(suit: '♣', rank: 'Q'),
-          ], // Player 1 has hearts and clubs
-          [Card(suit: '♦', rank: 'J')], // Player 2 has diamonds only
-          [Card(suit: '♣', rank: '10')], // Player 3 has clubs only
-        ],
+        playerHands: List.generate(4, (_) => []),
+        dealer: 1,
       );
+      expect(round2.firstPlayer, 1); // Dealer starts
 
-      // First player leads with hearts
-      final roundWithLead = round.addCardToTrick(Card(suit: '♥', rank: 'A'), 0);
-
-      // Player 1 tries to play clubs when they have hearts (invalid)
-      expect(
-        () => roundWithLead.addCardToTrick(Card(suit: '♣', rank: 'Q'), 1),
-        throwsA(isA<ArgumentError>()),
+      final round3 = Round(
+        roundNumber: 2,
+        powerSuit: '♠',
+        playerHands: List.generate(4, (_) => []),
+        dealer: 2,
       );
+      expect(round3.firstPlayer, 2); // Dealer starts
 
-      // Player 1 plays hearts (valid)
-      final validPlay = roundWithLead.addCardToTrick(
-        Card(suit: '♥', rank: 'K'),
-        1,
+      final round4 = Round(
+        roundNumber: 2,
+        powerSuit: '♠',
+        playerHands: List.generate(4, (_) => []),
+        dealer: 3,
       );
-      expect(validPlay.currentTrick.length, 2);
+      expect(round4.firstPlayer, 3); // Dealer starts
     });
 
     test('Complete follow suit and trick winning rules verification', () {
@@ -291,6 +283,7 @@ void main() {
           ], // Player 2: has diamonds and power suit
           [Card(suit: '♣', rank: 'J')], // Player 3: has clubs only
         ],
+        dealer: 0,
       );
 
       // Rule 1: First player can play any card
@@ -351,6 +344,7 @@ void main() {
           [Card(suit: '♥', rank: 'Q')], // Player 2: has hearts
           [Card(suit: '♦', rank: 'J')], // Player 3: has diamonds only
         ],
+        dealer: 1,
       );
 
       // All players follow suit except player 3
@@ -379,6 +373,7 @@ void main() {
             ], // Player 2: has power suit (low value)
             [Card(suit: '♦', rank: 'J')], // Player 3: has diamonds only
           ],
+          dealer: 2,
         );
 
         // Player 2 plays power suit even though they could follow suit
@@ -409,6 +404,7 @@ void main() {
             [Card(suit: '♠', rank: 'A')], // Player 2: has power suit (higher)
             [Card(suit: '♦', rank: 'J')], // Player 3: has diamonds only
           ],
+          dealer: 3,
         );
 
         // Multiple players play power suit

@@ -263,5 +263,114 @@ void main() {
         expect(suit, isIn(GameConstants.suits));
       }
     });
+
+    test('Dealer rotation works correctly', () {
+      gameState.startNewGame();
+
+      // Round 2: Player 0 should be dealer, Player 0 should start
+      expect(gameState.currentDealer, 0);
+      expect(gameState.currentRound!.dealer, 0);
+      expect(gameState.currentRound!.firstPlayer, 0);
+
+      // Set bids and play all tricks for round 2
+      for (int i = 0; i < 4; i++) {
+        gameState.setPlayerBid(i, 1);
+      }
+
+      // Play all tricks for round 2 (2 tricks)
+      for (int trick = 0; trick < 2; trick++) {
+        for (int player = 0; player < 4; player++) {
+          if (gameState.currentRound!.playerHands[player].isNotEmpty) {
+            final validCards = gameState.getValidCards(player);
+            if (validCards.isNotEmpty) {
+              final card = validCards[0];
+              gameState.playCard(player, card);
+            }
+          }
+        }
+      }
+
+      gameState.completeRound();
+
+      // Round 3: Player 1 should be dealer, Player 1 should start
+      expect(gameState.currentDealer, 1);
+      expect(gameState.currentRound!.dealer, 1);
+      expect(gameState.currentRound!.firstPlayer, 1);
+
+      // Set bids and play all tricks for round 3
+      for (int i = 0; i < 4; i++) {
+        gameState.setPlayerBid(i, 1);
+      }
+
+      // Play all tricks for round 3 (3 tricks)
+      for (int trick = 0; trick < 3; trick++) {
+        for (int player = 0; player < 4; player++) {
+          if (gameState.currentRound!.playerHands[player].isNotEmpty) {
+            final validCards = gameState.getValidCards(player);
+            if (validCards.isNotEmpty) {
+              final card = validCards[0];
+              gameState.playCard(player, card);
+            }
+          }
+        }
+      }
+
+      gameState.completeRound();
+
+      // Round 4: Player 2 should be dealer, Player 2 should start
+      expect(gameState.currentDealer, 2);
+      expect(gameState.currentRound!.dealer, 2);
+      expect(gameState.currentRound!.firstPlayer, 2);
+
+      // Set bids and play all tricks for round 4
+      for (int i = 0; i < 4; i++) {
+        gameState.setPlayerBid(i, 1);
+      }
+
+      // Play all tricks for round 4 (4 tricks)
+      for (int trick = 0; trick < 4; trick++) {
+        for (int player = 0; player < 4; player++) {
+          if (gameState.currentRound!.playerHands[player].isNotEmpty) {
+            final validCards = gameState.getValidCards(player);
+            if (validCards.isNotEmpty) {
+              final card = validCards[0];
+              gameState.playCard(player, card);
+            }
+          }
+        }
+      }
+
+      gameState.completeRound();
+
+      // Round 5: Player 3 should be dealer, Player 3 should start
+      expect(gameState.currentDealer, 3);
+      expect(gameState.currentRound!.dealer, 3);
+      expect(gameState.currentRound!.firstPlayer, 3);
+
+      // Set bids and play all tricks for round 5
+      for (int i = 0; i < 4; i++) {
+        gameState.setPlayerBid(i, 1);
+      }
+
+      // Play all tricks for round 5 (5 tricks)
+      for (int trick = 0; trick < 5; trick++) {
+        for (int player = 0; player < 4; player++) {
+          if (gameState.currentRound!.playerHands[player].isNotEmpty) {
+            final validCards = gameState.getValidCards(player);
+            if (validCards.isNotEmpty) {
+              final card = validCards[0];
+              gameState.playCard(player, card);
+            }
+          }
+        }
+      }
+
+      gameState.completeRound();
+
+      // Round 6: Player 0 should be dealer again, Player 0 should start
+      expect(gameState.currentDealer, 0);
+      expect(gameState.currentRound!.dealer, 0);
+      expect(gameState.currentRound!.firstPlayer, 0);
+    });
   });
 }

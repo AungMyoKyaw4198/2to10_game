@@ -11,6 +11,7 @@ class GameState extends ChangeNotifier {
   int _currentRoundNumber = GameConstants.minRound;
   bool _isGameComplete = false;
   bool _isGameStarted = false;
+  int _currentDealer = 0; // Track current dealer (0-3)
 
   // Getters
   List<Player> get players => _players;
@@ -19,6 +20,7 @@ class GameState extends ChangeNotifier {
   bool get isGameComplete => _isGameComplete;
   bool get isGameStarted => _isGameStarted;
   bool get isGameInProgress => _isGameStarted && !_isGameComplete;
+  int get currentDealer => _currentDealer;
 
   GameState() {
     _initializePlayers();
@@ -37,6 +39,7 @@ class GameState extends ChangeNotifier {
     _currentRoundNumber = GameConstants.minRound;
     _isGameComplete = false;
     _isGameStarted = true;
+    _currentDealer = 0; // Start with Player 0 as dealer
 
     // Reset all players
     for (int i = 0; i < _players.length; i++) {
@@ -70,6 +73,7 @@ class GameState extends ChangeNotifier {
       roundNumber: _currentRoundNumber,
       powerSuit: powerSuit,
       playerHands: playerHands,
+      dealer: _currentDealer,
     );
 
     notifyListeners();
@@ -85,15 +89,17 @@ class GameState extends ChangeNotifier {
     }
   }
 
-  // Deal cards to players
+  // Deal cards to players starting from the dealer
   List<List<Card>> _dealCards(int cardsPerPlayer) {
     List<Card> deck = _createDeck();
     deck.shuffle();
 
     List<List<Card>> hands = List.generate(4, (_) => <Card>[]);
 
+    // Deal starting from the dealer
     for (int i = 0; i < cardsPerPlayer * 4; i++) {
-      hands[i % 4].add(deck[i]);
+      int playerIndex = (_currentDealer + i) % 4; // Start from dealer
+      hands[playerIndex].add(deck[i]);
     }
 
     return hands;
@@ -165,6 +171,9 @@ class GameState extends ChangeNotifier {
     _currentRound = _currentRound!.markComplete();
     _calculateRoundScores();
     _currentRoundNumber++;
+
+    // Rotate dealer clockwise for next round
+    _currentDealer = (_currentDealer + 1) % 4;
 
     _startNewRound();
   }

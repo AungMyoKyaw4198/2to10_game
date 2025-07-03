@@ -207,6 +207,17 @@ class _GameScreenState extends State<GameScreen> {
 
           const SizedBox(height: 8),
 
+          // Dealer info
+          Text(
+            'Dealer: ${GameConstants.defaultPlayerNames[gameState.currentDealer]}',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: Colors.white70,
+              fontSize: 14,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
           // Power suit display
           if (gameState.currentRound != null) ...[
             Text(

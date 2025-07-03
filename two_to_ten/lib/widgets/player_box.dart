@@ -465,11 +465,11 @@ class _PlayerBoxState extends State<PlayerBox> {
     int currentTrickSize = widget.currentRound!.currentTrick.length;
 
     // First player to play in a trick is the winner of the previous trick
-    // or player 0 if it's the first trick
+    // or the player to the dealer's left if it's the first trick
     int firstPlayer =
         widget.currentRound!.trickWinners.isNotEmpty
             ? widget.currentRound!.trickWinners.last
-            : 0;
+            : widget.currentRound!.firstPlayer;
 
     // Calculate whose turn it is
     int currentPlayer = (firstPlayer + currentTrickSize) % 4;

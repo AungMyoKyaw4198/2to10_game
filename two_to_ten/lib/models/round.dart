@@ -9,6 +9,7 @@ class Round {
   final List<int> bids;
   final int currentTrickIndex;
   final bool isComplete;
+  final int dealer; // Track the dealer for this round
 
   Round({
     required this.roundNumber,
@@ -19,6 +20,7 @@ class Round {
     List<int>? bids,
     this.currentTrickIndex = 0,
     this.isComplete = false,
+    required this.dealer,
   }) : currentTrick = currentTrick ?? [],
        trickWinners = trickWinners ?? [],
        bids =
@@ -163,6 +165,9 @@ class Round {
     return copyWith(isComplete: true);
   }
 
+  // Get the first player to bid/play (dealer starts)
+  int get firstPlayer => dealer;
+
   // Create a copy of the round with updated values
   Round copyWith({
     int? roundNumber,
@@ -173,6 +178,7 @@ class Round {
     List<int>? bids,
     int? currentTrickIndex,
     bool? isComplete,
+    int? dealer,
   }) {
     return Round(
       roundNumber: roundNumber ?? this.roundNumber,
@@ -185,6 +191,7 @@ class Round {
       bids: bids ?? List.from(this.bids),
       currentTrickIndex: currentTrickIndex ?? this.currentTrickIndex,
       isComplete: isComplete ?? this.isComplete,
+      dealer: dealer ?? this.dealer,
     );
   }
 
@@ -210,6 +217,7 @@ class Round {
       'bids': bids,
       'currentTrickIndex': currentTrickIndex,
       'isComplete': isComplete,
+      'dealer': dealer,
     };
   }
 
@@ -245,6 +253,7 @@ class Round {
       bids: List<int>.from(json['bids'] as List),
       currentTrickIndex: json['currentTrickIndex'] as int,
       isComplete: json['isComplete'] as bool,
+      dealer: json['dealer'] as int,
     );
   }
 }

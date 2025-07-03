@@ -44,10 +44,24 @@ class _BidInputWidgetState extends State<BidInputWidget> {
   }
 
   void _findNextPlayerToBid() {
-    for (int i = 0; i < widget.currentRound.bids.length; i++) {
-      if (widget.currentRound.bids[i] < 0) {
+    // Start bidding from the player to the dealer's left (firstPlayer)
+    int firstPlayer = widget.currentRound.firstPlayer;
+
+    // Check if the first player still needs to bid
+    if (widget.currentRound.bids[firstPlayer] < 0) {
+      setState(() {
+        _currentPlayerIndex = firstPlayer;
+        _currentBid = 0;
+      });
+      return;
+    }
+
+    // Check subsequent players in clockwise order
+    for (int i = 1; i < 4; i++) {
+      int playerIndex = (firstPlayer + i) % 4;
+      if (widget.currentRound.bids[playerIndex] < 0) {
         setState(() {
-          _currentPlayerIndex = i;
+          _currentPlayerIndex = playerIndex;
           _currentBid = 0;
         });
         return;

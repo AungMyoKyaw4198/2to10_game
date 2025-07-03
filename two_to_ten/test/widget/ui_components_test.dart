@@ -27,6 +27,7 @@ void main() {
         roundNumber: 2,
         powerSuit: '♠',
         playerHands: List.generate(4, (_) => []),
+        dealer: 0,
       );
     });
 
@@ -51,7 +52,7 @@ void main() {
       expect(find.text('Test Player'), findsOneWidget);
 
       // Verify score is displayed
-      expect(find.text('50'), findsOneWidget);
+      expect(find.text('Score: 50'), findsOneWidget);
 
       // Verify bid is displayed
       expect(find.text('Bid: 2'), findsOneWidget);
@@ -190,7 +191,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Start Game'), findsOneWidget);
+      expect(find.text('Start New Game'), findsOneWidget);
     });
 
     testWidgets('GameScreen starts game when start button is pressed', (
@@ -206,7 +207,7 @@ void main() {
       );
 
       // Tap start game button
-      await tester.tap(find.text('Start Game'));
+      await tester.tap(find.text('Start New Game'));
       await tester.pumpAndSettle();
 
       expect(gameState.isGameStarted, true);
