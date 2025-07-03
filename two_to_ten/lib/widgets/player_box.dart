@@ -64,8 +64,8 @@ class _PlayerBoxState extends State<PlayerBox> {
       return;
     List<game_card.Card> hand =
         widget.currentRound!.playerHands[widget.playerIndex];
-    double cardWidth = 40;
-    double cardHeight = 56;
+    double cardWidth = 48;
+    double cardHeight = 68;
     String stats =
         'Bid: ${widget.player.currentBid >= 0 ? widget.player.currentBid : '-'} | Score: ${widget.player.score} | Bags: ${widget.player.bags}';
     // Get valid cards for this player using the round's getValidCards
@@ -359,8 +359,8 @@ class _PlayerBoxState extends State<PlayerBox> {
     }
     List<game_card.Card> hand =
         widget.currentRound!.playerHands[widget.playerIndex];
-    double cardWidth = 40;
-    double cardHeight = 56;
+    double cardWidth = 48;
+    double cardHeight = 68;
     double overlap = 0.2; // 20% offset, 80% overlap
     if (widget.position == 'left' || widget.position == 'right') {
       // Vertical stack for side players

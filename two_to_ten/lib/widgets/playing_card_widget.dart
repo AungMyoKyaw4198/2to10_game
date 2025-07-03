@@ -18,8 +18,8 @@ class PlayingCardWidget extends StatelessWidget {
     this.faceUp = false,
     this.isSelected = false,
     this.isPlayable = false,
-    this.width = 40,
-    this.height = 56,
+    this.width = 48,
+    this.height = 68,
     this.onTap,
     this.playerName,
     this.playerStats,
@@ -63,7 +63,9 @@ class PlayingCardWidget extends StatelessWidget {
                     style: TextStyle(
                       color: Color(card.color),
                       fontWeight: FontWeight.bold,
-                      fontSize: width * 0.45,
+                      fontSize: width * 0.44,
+                      fontFamily: 'RobotoMono',
+                      letterSpacing: card.displayString.length > 2 ? -1.5 : 0,
                       shadows:
                           isPlayable
                               ? [
@@ -74,6 +76,7 @@ class PlayingCardWidget extends StatelessWidget {
                               ]
                               : null,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 )
                 : Center(
