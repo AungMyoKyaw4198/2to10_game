@@ -9,6 +9,8 @@ class PlayingCardWidget extends StatelessWidget {
   final double width;
   final double height;
   final VoidCallback? onTap;
+  final String? playerName;
+  final String? playerStats; // e.g. "Bid: 2 | Score: 30 | Bags: 1"
 
   const PlayingCardWidget({
     super.key,
@@ -19,11 +21,13 @@ class PlayingCardWidget extends StatelessWidget {
     this.width = 40,
     this.height = 56,
     this.onTap,
+    this.playerName,
+    this.playerStats,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    Widget cardWidget = GestureDetector(
       onTap: isPlayable && onTap != null ? onTap : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 120),
@@ -80,6 +84,48 @@ class PlayingCardWidget extends StatelessWidget {
                   ),
                 ),
       ),
+    );
+
+    if (playerName == null && playerStats == null) {
+      return cardWidget;
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (playerName != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 2),
+            child: Text(
+              playerName!,
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                shadows: [Shadow(color: Colors.white, blurRadius: 2)],
+              ),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
+        cardWidget,
+        if (playerStats != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(
+              playerStats!,
+              style: const TextStyle(
+                color: Colors.black87,
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+            ),
+          ),
+      ],
     );
   }
 }

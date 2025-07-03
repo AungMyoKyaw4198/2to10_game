@@ -66,6 +66,8 @@ class _PlayerBoxState extends State<PlayerBox> {
         widget.currentRound!.playerHands[widget.playerIndex];
     double cardWidth = 40;
     double cardHeight = 56;
+    String stats =
+        'Bid: ${widget.player.currentBid >= 0 ? widget.player.currentBid : '-'} | Score: ${widget.player.score} | Bags: ${widget.player.bags}';
     int? selectedIdx = await showModalBottomSheet<int>(
       context: context,
       backgroundColor: Colors.white,
@@ -78,6 +80,25 @@ class _PlayerBoxState extends State<PlayerBox> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Player name and stats
+              Text(
+                widget.player.name,
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                stats,
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
