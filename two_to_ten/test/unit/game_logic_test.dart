@@ -508,6 +508,9 @@ void main() {
       final cardToPlay3 = validCards3.isNotEmpty ? validCards3[0] : player3Card;
       gameState.playCard(3, cardToPlay3);
 
+      // Manually complete the trick since it now has a 3-second delay
+      gameState.completeCurrentTrick();
+
       expect(gameState.currentRound!.trickWinners.length, 1);
       expect(
         gameState.players[0].tricksWon +
@@ -516,6 +519,43 @@ void main() {
             gameState.players[3].tricksWon,
         1,
       );
+    });
+
+    test('Completed trick display delay', () {
+      gameState.startNewGame();
+
+      // Set bids first
+      for (int i = 0; i < 4; i++) {
+        gameState.setPlayerBid(i, 1);
+      }
+
+      // Play cards for first trick - use valid cards
+      final validCards0 = gameState.getValidCards(0);
+      final validCards1 = gameState.getValidCards(1);
+      final validCards2 = gameState.getValidCards(2);
+      final validCards3 = gameState.getValidCards(3);
+
+      // Play first three cards
+      gameState.playCard(0, validCards0[0]);
+      gameState.playCard(1, validCards1[0]);
+      gameState.playCard(2, validCards2[0]);
+
+      // Should not be showing completed trick yet
+      expect(gameState.isShowingCompletedTrick, false);
+
+      // Play the fourth card (completing the trick)
+      gameState.playCard(3, validCards3[0]);
+
+      // Should now be showing completed trick
+      expect(gameState.isShowingCompletedTrick, true);
+      expect(gameState.currentRound!.isCurrentTrickComplete, true);
+
+      // Manually complete the trick
+      gameState.completeCurrentTrick();
+
+      // Should no longer be showing completed trick
+      expect(gameState.isShowingCompletedTrick, false);
+      expect(gameState.currentRound!.trickWinners.length, 1);
     });
   });
 
@@ -722,6 +762,8 @@ void main() {
               }
             }
           }
+          // Manually complete the trick since it now has a 3-second delay
+          gameState.completeCurrentTrick();
         }
 
         gameState.completeRound();

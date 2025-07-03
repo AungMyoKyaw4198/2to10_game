@@ -44,6 +44,8 @@ void main() {
               }
             }
           }
+          // Manually complete the trick since it now has a 3-second delay
+          gameState.completeCurrentTrick();
         }
 
         // Complete the round
@@ -227,6 +229,8 @@ void main() {
               }
             }
           }
+          // Manually complete the trick since it now has a 3-second delay
+          gameState.completeCurrentTrick();
         }
 
         gameState.completeRound();
@@ -288,6 +292,8 @@ void main() {
             }
           }
         }
+        // Manually complete the trick since it now has a 3-second delay
+        gameState.completeCurrentTrick();
       }
 
       gameState.completeRound();
@@ -313,6 +319,8 @@ void main() {
             }
           }
         }
+        // Manually complete the trick since it now has a 3-second delay
+        gameState.completeCurrentTrick();
       }
 
       gameState.completeRound();
@@ -338,6 +346,8 @@ void main() {
             }
           }
         }
+        // Manually complete the trick since it now has a 3-second delay
+        gameState.completeCurrentTrick();
       }
 
       gameState.completeRound();
@@ -363,6 +373,8 @@ void main() {
             }
           }
         }
+        // Manually complete the trick since it now has a 3-second delay
+        gameState.completeCurrentTrick();
       }
 
       gameState.completeRound();

@@ -118,6 +118,7 @@ class _GameScreenState extends State<GameScreen> {
                 playerIndex: 0,
                 currentRound: gameState.currentRound,
                 onCardPlayed: (card) => gameState.playCard(0, card),
+                gameState: gameState,
               ),
             ),
           ),
@@ -138,6 +139,7 @@ class _GameScreenState extends State<GameScreen> {
                       playerIndex: 3,
                       currentRound: gameState.currentRound,
                       onCardPlayed: (card) => gameState.playCard(3, card),
+                      gameState: gameState,
                     ),
                   ),
                 ),
@@ -159,6 +161,7 @@ class _GameScreenState extends State<GameScreen> {
                       playerIndex: 1,
                       currentRound: gameState.currentRound,
                       onCardPlayed: (card) => gameState.playCard(1, card),
+                      gameState: gameState,
                     ),
                   ),
                 ),
@@ -177,6 +180,7 @@ class _GameScreenState extends State<GameScreen> {
                 playerIndex: 2,
                 currentRound: gameState.currentRound,
                 onCardPlayed: (card) => gameState.playCard(2, card),
+                gameState: gameState,
               ),
             ),
           ),
@@ -233,7 +237,9 @@ class _GameScreenState extends State<GameScreen> {
             // Current trick display
             if (gameState.currentRound!.currentTrick.isNotEmpty) ...[
               Text(
-                'Current Trick:',
+                gameState.isShowingCompletedTrick
+                    ? 'Completed Trick:'
+                    : 'Current Trick:',
                 style: Theme.of(
                   context,
                 ).textTheme.titleSmall?.copyWith(color: Colors.white70),
@@ -254,6 +260,45 @@ class _GameScreenState extends State<GameScreen> {
                     ),
                 ],
               ),
+
+              // Show winner indicator when trick is complete
+              if (gameState.isShowingCompletedTrick &&
+                  gameState.currentRound!.trickWinners.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withValues(alpha: 0.8),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.amber.withValues(alpha: 0.4),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    'Winner: ${GameConstants.defaultPlayerNames[gameState.currentRound!.trickWinners.last]}',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Moving to next trick in 3 seconds...',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.white70,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
             ],
 
             const SizedBox(height: 16),

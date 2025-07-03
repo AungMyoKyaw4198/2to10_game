@@ -34,6 +34,8 @@ void main() {
     testWidgets('PlayerBox displays player information correctly', (
       WidgetTester tester,
     ) async {
+      final gameState = GameState();
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -43,6 +45,7 @@ void main() {
               playerIndex: 0,
               currentRound: testRound,
               onCardPlayed: (card) {},
+              gameState: gameState,
             ),
           ),
         ),
@@ -65,6 +68,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final playerWithWarning = testPlayer.copyWith(bags: 4);
+      final gameState = GameState();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -75,6 +79,7 @@ void main() {
               playerIndex: 1,
               currentRound: testRound,
               onCardPlayed: (card) {},
+              gameState: gameState,
             ),
           ),
         ),
@@ -87,10 +92,16 @@ void main() {
     testWidgets('PlayerBox shows turn indicator when it is player turn', (
       WidgetTester tester,
     ) async {
+      final gameState = GameState();
+      gameState.startNewGame();
+
+      // Set bids so the round can progress to playing phase
+      for (int i = 0; i < 4; i++) {
+        gameState.setPlayerBid(i, 1);
+      }
+
       // Set up round where player 0 is current turn (first to play)
-      final roundWithTurn = testRound.copyWith(
-        currentTrick: [], // Empty trick means player 0 goes first
-      );
+      final roundWithTurn = gameState.currentRound!;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -101,6 +112,7 @@ void main() {
               playerIndex: 0,
               currentRound: roundWithTurn,
               onCardPlayed: (card) {},
+              gameState: gameState,
             ),
           ),
         ),

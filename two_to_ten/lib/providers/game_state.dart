@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../models/card.dart';
 import '../models/player.dart';
@@ -12,6 +13,9 @@ class GameState extends ChangeNotifier {
   bool _isGameComplete = false;
   bool _isGameStarted = false;
   int _currentDealer = 0; // Track current dealer (0-3)
+  bool _isShowingCompletedTrick =
+      false; // Track if we're showing a completed trick
+  Timer? _trickDisplayTimer; // Timer for showing completed tricks
 
   // Getters
   List<Player> get players => _players;
@@ -21,6 +25,7 @@ class GameState extends ChangeNotifier {
   bool get isGameStarted => _isGameStarted;
   bool get isGameInProgress => _isGameStarted && !_isGameComplete;
   int get currentDealer => _currentDealer;
+  bool get isShowingCompletedTrick => _isShowingCompletedTrick;
 
   GameState() {
     _initializePlayers();
@@ -133,15 +138,18 @@ class GameState extends ChangeNotifier {
     try {
       _currentRound = _currentRound!.addCardToTrick(card, playerIndex);
 
-      // If trick is complete, determine winner and update player stats
+      // If trick is complete, show it for 3 seconds before moving to next trick
       if (_currentRound!.isCurrentTrickComplete) {
-        _currentRound = _currentRound!.completeCurrentTrick();
+        _isShowingCompletedTrick = true;
+        notifyListeners();
 
-        // Update trick count for the winner
-        int winnerIndex = _currentRound!.trickWinners.last;
-        _players[winnerIndex] = _players[winnerIndex].copyWith(
-          tricksWon: _players[winnerIndex].tricksWon + 1,
-        );
+        // Cancel any existing timer
+        _trickDisplayTimer?.cancel();
+
+        // Set timer to complete the trick after 3 seconds
+        _trickDisplayTimer = Timer(const Duration(seconds: 3), () {
+          completeCurrentTrick();
+        });
       }
 
       notifyListeners();
@@ -150,6 +158,22 @@ class GameState extends ChangeNotifier {
       print('Invalid card play: $e');
       // For now, just ignore the invalid play
     }
+  }
+
+  // Complete the current trick and move to next
+  void completeCurrentTrick() {
+    if (_currentRound == null) return;
+
+    _currentRound = _currentRound!.completeCurrentTrick();
+
+    // Update trick count for the winner
+    int winnerIndex = _currentRound!.trickWinners.last;
+    _players[winnerIndex] = _players[winnerIndex].copyWith(
+      tricksWon: _players[winnerIndex].tricksWon + 1,
+    );
+
+    _isShowingCompletedTrick = false;
+    notifyListeners();
   }
 
   // Get valid cards that a player can play
@@ -167,6 +191,10 @@ class GameState extends ChangeNotifier {
   // Complete the current round
   void completeRound() {
     if (_currentRound == null || !_currentRound!.areAllTricksComplete) return;
+
+    // Cancel any active trick display timer
+    _trickDisplayTimer?.cancel();
+    _isShowingCompletedTrick = false;
 
     _currentRound = _currentRound!.markComplete();
     _calculateRoundScores();
@@ -279,5 +307,12 @@ class GameState extends ChangeNotifier {
     }
 
     return winner;
+  }
+
+  // Dispose method to clean up timers
+  @override
+  void dispose() {
+    _trickDisplayTimer?.cancel();
+    super.dispose();
   }
 }

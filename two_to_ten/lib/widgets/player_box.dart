@@ -12,6 +12,7 @@ class PlayerBox extends StatefulWidget {
   final int playerIndex;
   final Round? currentRound;
   final Function(game_card.Card) onCardPlayed;
+  final GameState? gameState;
 
   const PlayerBox({
     super.key,
@@ -20,6 +21,7 @@ class PlayerBox extends StatefulWidget {
     required this.playerIndex,
     this.currentRound,
     required this.onCardPlayed,
+    this.gameState,
   });
 
   @override
@@ -173,7 +175,7 @@ class _PlayerBoxState extends State<PlayerBox> {
     bool hasImmaculateStreak = _hasImmaculateStreak();
 
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(5),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -196,7 +198,7 @@ class _PlayerBoxState extends State<PlayerBox> {
             ),
           ),
 
-          const SizedBox(height: 4),
+          // const SizedBox(height: 4),
 
           // Bid
           Text(
@@ -245,7 +247,7 @@ class _PlayerBoxState extends State<PlayerBox> {
           if (hasPerfectStreak || hasImmaculateStreak) ...[
             const SizedBox(height: 4),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
               decoration: BoxDecoration(
                 color: hasImmaculateStreak ? Colors.purple : Colors.amber,
                 borderRadius: BorderRadius.circular(12),
@@ -273,7 +275,7 @@ class _PlayerBoxState extends State<PlayerBox> {
           if (isPlayerTurn) ...[
             const SizedBox(height: 4),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
               decoration: BoxDecoration(
                 color: Colors.yellow,
                 borderRadius: BorderRadius.circular(12),
@@ -461,6 +463,9 @@ class _PlayerBoxState extends State<PlayerBox> {
     // If all tricks complete, no one can play cards
     if (widget.currentRound!.areAllTricksComplete) return false;
 
+    // If showing completed trick, no one can play cards
+    if (widget.gameState?.isShowingCompletedTrick == true) return false;
+
     // Determine whose turn it is based on current trick
     int currentTrickSize = widget.currentRound!.currentTrick.length;
 
@@ -472,8 +477,8 @@ class _PlayerBoxState extends State<PlayerBox> {
             : widget.currentRound!.firstPlayer;
 
     // Calculate whose turn it is
-    int currentPlayer = (firstPlayer + currentTrickSize) % 4;
+    int currentPlayerTurn = (firstPlayer + currentTrickSize) % 4;
 
-    return currentPlayer == widget.playerIndex;
+    return widget.playerIndex == currentPlayerTurn;
   }
 }
