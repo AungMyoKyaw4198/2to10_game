@@ -335,19 +335,29 @@ class PlayerBox extends StatelessWidget {
     // Adjust font size based on card size
     double fontSize = cardWidth > 25 ? 10 : 8;
 
+    // Show card back if it's not this player's turn
+    bool showCardBack = !isPlayerTurn;
+
     return GestureDetector(
       onTap: isPlayable ? () => onCardPlayed(card) : null,
       child: Container(
         width: cardWidth,
         height: cardHeight,
         decoration: BoxDecoration(
-          color: isPlayable ? Colors.white : Colors.grey.shade300,
+          color:
+              showCardBack
+                  ? Colors
+                      .blue
+                      .shade800 // Card back color
+                  : (isPlayable ? Colors.white : Colors.grey.shade300),
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
             color:
-                isPlayable
-                    ? (isPlayerTurn ? Colors.yellow : Color(card.color))
-                    : Colors.grey,
+                showCardBack
+                    ? Colors.blue.shade600
+                    : (isPlayable
+                        ? (isPlayerTurn ? Colors.yellow : Color(card.color))
+                        : Colors.grey),
             width: isPlayable && isPlayerTurn ? 2 : 1,
           ),
           boxShadow:
@@ -362,26 +372,33 @@ class PlayerBox extends StatelessWidget {
                   : null,
         ),
         child: Center(
-          child: Text(
-            card.displayString,
-            style: TextStyle(
-              color:
-                  isPlayable && isPlayerTurn
-                      ? Colors.yellow.shade800
-                      : Color(card.color),
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              shadows:
-                  isPlayable && isPlayerTurn
-                      ? [
-                        Shadow(
-                          color: Colors.yellow.withValues(alpha: 0.5),
-                          blurRadius: 2,
-                        ),
-                      ]
-                      : null,
-            ),
-          ),
+          child:
+              showCardBack
+                  ? Icon(
+                    Icons.style, // Card back pattern icon
+                    color: Colors.blue.shade200,
+                    size: fontSize * 1.2,
+                  )
+                  : Text(
+                    card.displayString,
+                    style: TextStyle(
+                      color:
+                          isPlayable && isPlayerTurn
+                              ? Colors.yellow.shade800
+                              : Color(card.color),
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.bold,
+                      shadows:
+                          isPlayable && isPlayerTurn
+                              ? [
+                                Shadow(
+                                  color: Colors.yellow.withValues(alpha: 0.5),
+                                  blurRadius: 2,
+                                ),
+                              ]
+                              : null,
+                    ),
+                  ),
         ),
       ),
     );
