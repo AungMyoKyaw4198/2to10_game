@@ -68,6 +68,10 @@ class _PlayerBoxState extends State<PlayerBox> {
     double cardHeight = 56;
     String stats =
         'Bid: ${widget.player.currentBid >= 0 ? widget.player.currentBid : '-'} | Score: ${widget.player.score} | Bags: ${widget.player.bags}';
+    // Get valid cards for this player using the round's getValidCards
+    List<game_card.Card> validCards = widget.currentRound!.getValidCards(
+      widget.playerIndex,
+    );
     int? selectedIdx = await showModalBottomSheet<int>(
       context: context,
       backgroundColor: Colors.white,
@@ -109,11 +113,11 @@ class _PlayerBoxState extends State<PlayerBox> {
                         card: hand[i],
                         faceUp: true,
                         isSelected: _selectedCardIndex == i,
-                        isPlayable: _isPlayerTurn() && _isCardPlayable(hand[i]),
+                        isPlayable: validCards.contains(hand[i]),
                         width: cardWidth,
                         height: cardHeight,
                         onTap:
-                            _isPlayerTurn() && _isCardPlayable(hand[i])
+                            validCards.contains(hand[i])
                                 ? () {
                                   Navigator.of(context).pop(i);
                                 }
