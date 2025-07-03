@@ -245,60 +245,107 @@ class _GameScreenState extends State<GameScreen> {
                 ).textTheme.titleSmall?.copyWith(color: Colors.white70),
               ),
               const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              // Display cards in a 2x2 grid to prevent overflow
+              Column(
                 children: [
-                  for (final card in gameState.currentRound!.currentTrick)
+                  // First row (cards 0 and 1)
+                  if (gameState.currentRound!.currentTrick.length >= 1)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: PlayingCardWidget(
+                            card: gameState.currentRound!.currentTrick[0],
+                            faceUp: true,
+                            width: 40,
+                            height: 56,
+                          ),
+                        ),
+                        if (gameState.currentRound!.currentTrick.length >= 2)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 2),
+                            child: PlayingCardWidget(
+                              card: gameState.currentRound!.currentTrick[1],
+                              faceUp: true,
+                              width: 40,
+                              height: 56,
+                            ),
+                          ),
+                      ],
+                    ),
+                  // Second row (cards 2 and 3)
+                  if (gameState.currentRound!.currentTrick.length >= 3)
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2),
-                      child: PlayingCardWidget(
-                        card: card,
-                        faceUp: true,
-                        width: 40,
-                        height: 56,
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 2),
+                            child: PlayingCardWidget(
+                              card: gameState.currentRound!.currentTrick[2],
+                              faceUp: true,
+                              width: 40,
+                              height: 56,
+                            ),
+                          ),
+                          if (gameState.currentRound!.currentTrick.length >= 4)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 2,
+                              ),
+                              child: PlayingCardWidget(
+                                card: gameState.currentRound!.currentTrick[3],
+                                faceUp: true,
+                                width: 40,
+                                height: 56,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                 ],
               ),
 
               // Show winner indicator when trick is complete
-              if (gameState.isShowingCompletedTrick &&
-                  gameState.currentRound!.trickWinners.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.withValues(alpha: 0.8),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.amber.withValues(alpha: 0.4),
-                        blurRadius: 8,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    'Winner: ${GameConstants.defaultPlayerNames[gameState.currentRound!.trickWinners.last]}',
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Moving to next trick in 3 seconds...',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white70,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ],
+              // if (gameState.isShowingCompletedTrick &&
+              //     gameState.currentRound!.trickWinners.isNotEmpty) ...[
+              //   // const SizedBox(height: 8),
+              //   Container(
+              //     padding: const EdgeInsets.symmetric(
+              //       horizontal: 12,
+              //       vertical: 6,
+              //     ),
+              //     decoration: BoxDecoration(
+              //       color: Colors.amber.withValues(alpha: 0.8),
+              //       borderRadius: BorderRadius.circular(16),
+              //       boxShadow: [
+              //         BoxShadow(
+              //           color: Colors.amber.withValues(alpha: 0.4),
+              //           blurRadius: 8,
+              //           spreadRadius: 2,
+              //         ),
+              //       ],
+              //     ),
+              //     child: Text(
+              //       'Winner: ${GameConstants.defaultPlayerNames[gameState.currentRound!.trickWinners.last]}',
+              //       style: const TextStyle(
+              //         color: Colors.black,
+              //         fontWeight: FontWeight.bold,
+              //         fontSize: 14,
+              //       ),
+              //     ),
+              //   ),
+              //   const SizedBox(height: 8),
+              //   Text(
+              //     'Moving to next trick in 3 seconds...',
+              //     style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              //       color: Colors.white70,
+              //       fontStyle: FontStyle.italic,
+              //     ),
+              //   ),
+              // ],
             ],
 
             const SizedBox(height: 16),

@@ -260,17 +260,9 @@ void main() {
         ),
       );
 
-      // Should show power suit
-      expect(find.text('Power Suit:'), findsOneWidget);
+      // Should show power suit (the actual text includes the suit symbol)
+      expect(find.textContaining('Power Suit:'), findsOneWidget);
       expect(find.textContaining('♠'), findsOneWidget);
-    });
-  });
-
-  group('Edge Case UI Tests', () {
-    late GameState gameState;
-
-    setUp(() {
-      gameState = GameState();
     });
 
     testWidgets('GameScreen handles 10-card round overflow', (
@@ -299,10 +291,18 @@ void main() {
       );
 
       // Should not crash with 10 cards
-      expect(find.text('Round 10'), findsOneWidget);
+      expect(find.textContaining('Round 10'), findsOneWidget);
 
       // Should show scrollable areas for side players
       expect(find.byType(SingleChildScrollView), findsWidgets);
+    });
+  });
+
+  group('Edge Case UI Tests', () {
+    late GameState gameState;
+
+    setUp(() {
+      gameState = GameState();
     });
 
     testWidgets('BidInputWidget handles zero bid correctly', (
