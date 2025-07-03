@@ -334,43 +334,29 @@ class _PlayerBoxState extends State<PlayerBox> {
     }
     List<game_card.Card> hand =
         widget.currentRound!.playerHands[widget.playerIndex];
-    double cardWidth =
-        widget.position == 'left' || widget.position == 'right' ? 20 : 40;
-    double cardHeight =
-        widget.position == 'left' || widget.position == 'right' ? 28 : 56;
-    int maxCardsPerRow =
-        widget.position == 'left' || widget.position == 'right' ? 4 : 5;
-    int cardsPerRow = maxCardsPerRow;
-    int numberOfRows = (hand.length / cardsPerRow).ceil();
-    double calculatedHeight = numberOfRows * (cardHeight + 1) + 8;
-    double maxHeight =
-        widget.position == 'left' || widget.position == 'right'
-            ? 200
-            : double.infinity;
-    double finalHeight =
-        calculatedHeight > maxHeight ? maxHeight : calculatedHeight;
-    return Container(
-      padding: const EdgeInsets.all(4),
-      height:
-          widget.position == 'left' || widget.position == 'right'
-              ? finalHeight
-              : null,
-      child: Wrap(
-        spacing: 1,
-        runSpacing: 1,
-        alignment: WrapAlignment.center,
-        children:
-            hand
-                .map(
-                  (card) => PlayingCardWidget(
-                    card: card,
-                    faceUp: false,
-                    width: cardWidth,
-                    height: cardHeight,
-                    // No onTap here; selection only in modal sheet
-                  ),
-                )
-                .toList(),
+    double cardWidth = 40;
+    double cardHeight = 56;
+    return SizedBox(
+      height: cardHeight + 8,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children:
+              hand
+                  .map(
+                    (card) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: PlayingCardWidget(
+                        card: card,
+                        faceUp: false,
+                        width: cardWidth,
+                        height: cardHeight,
+                      ),
+                    ),
+                  )
+                  .toList(),
+        ),
       ),
     );
   }

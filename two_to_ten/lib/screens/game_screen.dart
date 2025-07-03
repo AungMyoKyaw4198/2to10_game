@@ -7,6 +7,7 @@ import '../models/player.dart';
 import '../widgets/player_box.dart';
 import '../widgets/bid_input_widget.dart';
 import '../constants/game_constants.dart';
+import '../widgets/playing_card_widget.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -227,27 +228,20 @@ class _GameScreenState extends State<GameScreen> {
                 ).textTheme.titleSmall?.copyWith(color: Colors.white70),
               ),
               const SizedBox(height: 8),
-              Wrap(
-                spacing: 4,
-                children:
-                    gameState.currentRound!.currentTrick
-                        .map(
-                          (card) => Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              card.displayString,
-                              style: TextStyle(
-                                color: Color(card.color),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        )
-                        .toList(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (final card in gameState.currentRound!.currentTrick)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: PlayingCardWidget(
+                        card: card,
+                        faceUp: true,
+                        width: 40,
+                        height: 56,
+                      ),
+                    ),
+                ],
               ),
             ],
 
