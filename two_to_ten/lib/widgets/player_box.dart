@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:two_to_ten/widgets/playing_card_widget.dart';
 import '../models/card.dart' as game_card;
 import '../models/player.dart';
 import '../models/round.dart';
 import '../providers/game_state.dart';
 
-class PlayerBox extends StatelessWidget {
+class PlayerBox extends StatefulWidget {
   final Player player;
   final String position; // 'top', 'bottom', 'left', 'right'
   final int playerIndex;
@@ -22,43 +23,121 @@ class PlayerBox extends StatelessWidget {
   });
 
   @override
+  _PlayerBoxState createState() => _PlayerBoxState();
+}
+
+class _PlayerBoxState extends State<PlayerBox> {
+  int? _selectedCardIndex;
+
+  @override
   Widget build(BuildContext context) {
     bool isPlayerTurn = _isPlayerTurn();
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color:
+    return GestureDetector(
+      onTap: isPlayerTurn ? _showCardSelectionSheet : null,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isPlayerTurn ? Colors.yellow : Colors.white.withOpacity(0.3),
+            width: isPlayerTurn ? 2 : 1,
+          ),
+          boxShadow:
               isPlayerTurn
-                  ? Colors.yellow
-                  : Colors.white.withValues(alpha: 0.3),
-          width: isPlayerTurn ? 2 : 1,
+                  ? [
+                    BoxShadow(
+                      color: Colors.yellow.withOpacity(0.2),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                    ),
+                  ]
+                  : null,
         ),
-        boxShadow:
-            isPlayerTurn
-                ? [
-                  BoxShadow(
-                    color: Colors.yellow.withValues(alpha: 0.5),
-                    blurRadius: 10,
-                    spreadRadius: 2,
-                  ),
-                ]
-                : null,
+        child: _buildPlayerContent(context),
       ),
-      child: _buildPlayerContent(context),
     );
   }
 
+  void _showCardSelectionSheet() async {
+    if (widget.currentRound == null ||
+        widget.playerIndex >= widget.currentRound!.playerHands.length)
+      return;
+    List<game_card.Card> hand =
+        widget.currentRound!.playerHands[widget.playerIndex];
+    double cardWidth = 40;
+    double cardHeight = 56;
+    int? selectedIdx = await showModalBottomSheet<int>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (int i = 0; i < hand.length; i++)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: PlayingCardWidget(
+                        card: hand[i],
+                        faceUp: true,
+                        isSelected: _selectedCardIndex == i,
+                        isPlayable: _isPlayerTurn() && _isCardPlayable(hand[i]),
+                        width: cardWidth,
+                        height: cardHeight,
+                        onTap:
+                            _isPlayerTurn() && _isCardPlayable(hand[i])
+                                ? () {
+                                  Navigator.of(context).pop(i);
+                                }
+                                : null,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    if (selectedIdx != null) {
+      setState(() => _selectedCardIndex = selectedIdx);
+      widget.onCardPlayed(hand[selectedIdx]);
+      setState(() => _selectedCardIndex = null);
+    }
+  }
+
   Widget _buildPlayerContent(BuildContext context) {
-    // All players now use the same layout with cards at the bottom
+    final isVertical = widget.position == 'top' || widget.position == 'bottom';
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildPlayerInfo(context),
         const SizedBox(height: 8),
         _buildCardCount(context),
-        _buildPlayerHand(context),
+        if (isVertical)
+          Flexible(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: _buildPlayerHand(context),
+            ),
+          )
+        else
+          _buildPlayerHand(context),
       ],
     );
   }
@@ -75,7 +154,7 @@ class PlayerBox extends StatelessWidget {
         children: [
           // Player name with perfect streak effects
           Text(
-            player.name,
+            widget.player.name,
             style: TextStyle(
               color: _getPlayerNameColor(
                 isPlayerTurn,
@@ -96,7 +175,9 @@ class PlayerBox extends StatelessWidget {
 
           // Bid
           Text(
-            player.currentBid >= 0 ? 'Bid: ${player.currentBid}' : 'Not Bid',
+            widget.player.currentBid >= 0
+                ? 'Bid: ${widget.player.currentBid}'
+                : 'Not Bid',
             style: TextStyle(
               color: isPlayerTurn ? Colors.yellow : Colors.white70,
               fontSize: 12,
@@ -105,7 +186,7 @@ class PlayerBox extends StatelessWidget {
 
           // Score
           Text(
-            'Score: ${player.score}',
+            'Score: ${widget.player.score}',
             style: TextStyle(
               color: isPlayerTurn ? Colors.yellow : Colors.white70,
               fontSize: 12,
@@ -117,17 +198,18 @@ class PlayerBox extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Bags: ${player.bags}',
+                'Bags: ${widget.player.bags}',
                 style: TextStyle(
                   color:
-                      player.hasBagWarning
+                      widget.player.hasBagWarning
                           ? Colors.red
                           : (isPlayerTurn ? Colors.yellow : Colors.white70),
                   fontSize: 12,
-                  fontWeight: player.hasBagWarning ? FontWeight.bold : null,
+                  fontWeight:
+                      widget.player.hasBagWarning ? FontWeight.bold : null,
                 ),
               ),
-              if (player.hasBagWarning) ...[
+              if (widget.player.hasBagWarning) ...[
                 const SizedBox(width: 4),
                 const Icon(Icons.warning, color: Colors.red, size: 12),
               ],
@@ -223,230 +305,83 @@ class PlayerBox extends StatelessWidget {
   }
 
   bool _hasPerfectStreak() {
-    if (player.perfectRounds.isEmpty) return false;
+    if (widget.player.perfectRounds.isEmpty) return false;
 
     // Count how many perfect rounds the player has
     int perfectRoundsCount =
-        player.perfectRounds.where((perfect) => perfect).length;
+        widget.player.perfectRounds.where((perfect) => perfect).length;
 
     // Show perfect streak if they have at least 3 consecutive perfect rounds
     return perfectRoundsCount >= 3;
   }
 
   bool _hasImmaculateStreak() {
-    if (player.immaculateRounds.isEmpty) return false;
+    if (widget.player.immaculateRounds.isEmpty) return false;
 
     // Count how many immaculate rounds the player has
     int immaculateRoundsCount =
-        player.immaculateRounds.where((immaculate) => immaculate).length;
+        widget.player.immaculateRounds.where((immaculate) => immaculate).length;
 
     // Show immaculate streak if they have at least 2 consecutive immaculate rounds
     return immaculateRoundsCount >= 2;
   }
 
   Widget _buildPlayerHand(BuildContext context) {
-    if (currentRound == null ||
-        playerIndex >= currentRound!.playerHands.length ||
-        currentRound!.playerHands[playerIndex].isEmpty) {
+    if (widget.currentRound == null ||
+        widget.playerIndex >= widget.currentRound!.playerHands.length ||
+        widget.currentRound!.playerHands[widget.playerIndex].isEmpty) {
       return const SizedBox.shrink();
     }
-
-    List<game_card.Card> hand = currentRound!.playerHands[playerIndex];
-
-    // Check if it's this player's turn to play
-    bool isPlayerTurn = _isPlayerTurn();
-
-    // Determine card size and layout based on position
-    double cardWidth = 30;
-    double cardHeight = 40;
-    int maxCardsPerRow = 5;
-
-    // Adjust for left and right players to prevent overflow
-    if (position == 'left' || position == 'right') {
-      cardWidth = 20;
-      cardHeight = 28;
-      maxCardsPerRow = 4; // Fewer cards per row for side players
-    }
-
-    // Calculate dynamic height based on number of cards
-    int cardsPerRow = position == 'left' || position == 'right' ? 4 : 5;
+    List<game_card.Card> hand =
+        widget.currentRound!.playerHands[widget.playerIndex];
+    double cardWidth =
+        widget.position == 'left' || widget.position == 'right' ? 20 : 40;
+    double cardHeight =
+        widget.position == 'left' || widget.position == 'right' ? 28 : 56;
+    int maxCardsPerRow =
+        widget.position == 'left' || widget.position == 'right' ? 4 : 5;
+    int cardsPerRow = maxCardsPerRow;
     int numberOfRows = (hand.length / cardsPerRow).ceil();
-    double calculatedHeight =
-        numberOfRows * (cardHeight + 1) + 8; // +1 for spacing, +8 for padding
-
-    // Set maximum height for side players
+    double calculatedHeight = numberOfRows * (cardHeight + 1) + 8;
     double maxHeight =
-        position == 'left' || position == 'right' ? 200 : double.infinity;
+        widget.position == 'left' || widget.position == 'right'
+            ? 200
+            : double.infinity;
     double finalHeight =
         calculatedHeight > maxHeight ? maxHeight : calculatedHeight;
-
     return Container(
       padding: const EdgeInsets.all(4),
-      height: position == 'left' || position == 'right' ? finalHeight : null,
-      child:
-          finalHeight >= maxHeight &&
-                  (position == 'left' || position == 'right')
-              ? SingleChildScrollView(
-                child: Wrap(
-                  spacing: 1,
-                  runSpacing: 1,
-                  alignment: WrapAlignment.center,
-                  children:
-                      hand
-                          .map(
-                            (card) => _buildCardWidget(
-                              context,
-                              card,
-                              isPlayerTurn,
-                              cardWidth,
-                              cardHeight,
-                            ),
-                          )
-                          .toList(),
-                ),
-              )
-              : Wrap(
-                spacing: 1,
-                runSpacing: 1,
-                alignment: WrapAlignment.center,
-                children:
-                    hand
-                        .map(
-                          (card) => _buildCardWidget(
-                            context,
-                            card,
-                            isPlayerTurn,
-                            cardWidth,
-                            cardHeight,
-                          ),
-                        )
-                        .toList(),
-              ),
-    );
-  }
-
-  Widget _buildCardWidget(
-    BuildContext context,
-    game_card.Card card,
-    bool isPlayable,
-    double cardWidth,
-    double cardHeight,
-  ) {
-    bool isPlayerTurn = _isPlayerTurn();
-
-    // Get GameState to check if card is valid to play
-    GameState? gameState = Provider.of<GameState>(context, listen: false);
-    bool isValidCard = gameState?.isValidCardPlay(card, playerIndex) ?? false;
-
-    // Card is only playable if it's the player's turn AND the card is valid
-    bool canPlayCard = isPlayerTurn && isValidCard;
-
-    // Adjust font size based on card size
-    double fontSize = cardWidth > 25 ? 10 : 8;
-
-    // Show card back if it's not this player's turn
-    bool showCardBack = !isPlayerTurn;
-
-    return GestureDetector(
-      onTap: canPlayCard ? () => onCardPlayed(card) : null,
-      child: Container(
-        width: cardWidth,
-        height: cardHeight,
-        decoration: BoxDecoration(
-          color:
-              showCardBack
-                  ? Colors
-                      .blue
-                      .shade800 // Card back color
-                  : (canPlayCard ? Colors.white : Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(
-            color:
-                showCardBack
-                    ? Colors.blue.shade600
-                    : (canPlayCard
-                        ? (isPlayerTurn ? Colors.yellow : Color(card.color))
-                        : Colors.grey),
-            width: canPlayCard && isPlayerTurn ? 2 : 1,
-          ),
-          boxShadow:
-              canPlayCard && isPlayerTurn
-                  ? [
-                    BoxShadow(
-                      color: Colors.yellow.withValues(alpha: 0.6),
-                      blurRadius: 6,
-                      spreadRadius: 1,
-                    ),
-                  ]
-                  : null,
-        ),
-        child: Center(
-          child:
-              showCardBack
-                  ? Icon(
-                    Icons.style, // Card back pattern icon
-                    color: Colors.blue.shade200,
-                    size: fontSize * 1.2,
-                  )
-                  : Text(
-                    card.displayString,
-                    style: TextStyle(
-                      color:
-                          canPlayCard && isPlayerTurn
-                              ? Colors.yellow.shade800
-                              : (canPlayCard
-                                  ? Color(card.color)
-                                  : Colors.grey.shade600),
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.bold,
-                      shadows:
-                          canPlayCard && isPlayerTurn
-                              ? [
-                                Shadow(
-                                  color: Colors.yellow.withValues(alpha: 0.5),
-                                  blurRadius: 2,
-                                ),
-                              ]
-                              : null,
-                    ),
+      height:
+          widget.position == 'left' || widget.position == 'right'
+              ? finalHeight
+              : null,
+      child: Wrap(
+        spacing: 1,
+        runSpacing: 1,
+        alignment: WrapAlignment.center,
+        children:
+            hand
+                .map(
+                  (card) => PlayingCardWidget(
+                    card: card,
+                    faceUp: false,
+                    width: cardWidth,
+                    height: cardHeight,
+                    // No onTap here; selection only in modal sheet
                   ),
-        ),
+                )
+                .toList(),
       ),
     );
   }
 
-  bool _isPlayerTurn() {
-    if (currentRound == null) return false;
-
-    // If bidding phase, no one can play cards
-    if (!currentRound!.allBidsPlaced) return false;
-
-    // If all tricks complete, no one can play cards
-    if (currentRound!.areAllTricksComplete) return false;
-
-    // Determine whose turn it is based on current trick
-    int currentTrickSize = currentRound!.currentTrick.length;
-
-    // First player to play in a trick is the winner of the previous trick
-    // or player 0 if it's the first trick
-    int firstPlayer =
-        currentRound!.trickWinners.isNotEmpty
-            ? currentRound!.trickWinners.last
-            : 0;
-
-    // Calculate whose turn it is
-    int currentPlayer = (firstPlayer + currentTrickSize) % 4;
-
-    return currentPlayer == playerIndex;
-  }
-
   Widget _buildCardCount(BuildContext context) {
-    if (currentRound == null ||
-        playerIndex >= currentRound!.playerHands.length) {
+    if (widget.currentRound == null ||
+        widget.playerIndex >= widget.currentRound!.playerHands.length) {
       return const SizedBox.shrink();
     }
 
-    int cardCount = currentRound!.playerHands[playerIndex].length;
+    int cardCount = widget.currentRound!.playerHands[widget.playerIndex].length;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -460,5 +395,36 @@ class PlayerBox extends StatelessWidget {
         textAlign: TextAlign.center,
       ),
     );
+  }
+
+  bool _isCardPlayable(game_card.Card card) {
+    // Implement the logic to determine if a card is playable
+    // This is a placeholder and should be replaced with the actual implementation
+    return true; // Placeholder return, actual implementation needed
+  }
+
+  bool _isPlayerTurn() {
+    if (widget.currentRound == null) return false;
+
+    // If bidding phase, no one can play cards
+    if (!widget.currentRound!.allBidsPlaced) return false;
+
+    // If all tricks complete, no one can play cards
+    if (widget.currentRound!.areAllTricksComplete) return false;
+
+    // Determine whose turn it is based on current trick
+    int currentTrickSize = widget.currentRound!.currentTrick.length;
+
+    // First player to play in a trick is the winner of the previous trick
+    // or player 0 if it's the first trick
+    int firstPlayer =
+        widget.currentRound!.trickWinners.isNotEmpty
+            ? widget.currentRound!.trickWinners.last
+            : 0;
+
+    // Calculate whose turn it is
+    int currentPlayer = (firstPlayer + currentTrickSize) % 4;
+
+    return currentPlayer == widget.playerIndex;
   }
 }
