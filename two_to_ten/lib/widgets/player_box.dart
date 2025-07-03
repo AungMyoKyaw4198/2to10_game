@@ -336,29 +336,67 @@ class _PlayerBoxState extends State<PlayerBox> {
         widget.currentRound!.playerHands[widget.playerIndex];
     double cardWidth = 40;
     double cardHeight = 56;
-    return SizedBox(
-      height: cardHeight + 8,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children:
-              hand
-                  .map(
-                    (card) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2),
-                      child: PlayingCardWidget(
-                        card: card,
-                        faceUp: false,
-                        width: cardWidth,
-                        height: cardHeight,
-                      ),
+    double overlap = 0.2; // 20% offset, 80% overlap
+    if (widget.position == 'left' || widget.position == 'right') {
+      // Vertical stack for side players
+      double stackHeight =
+          cardHeight + (hand.length - 1) * cardHeight * overlap;
+      return SizedBox(
+        width: cardWidth + 8,
+        height: stackHeight,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: SizedBox(
+            width: cardWidth + 8,
+            height: stackHeight,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                for (int i = 0; i < hand.length; i++)
+                  Positioned(
+                    top: i * cardHeight * overlap,
+                    child: PlayingCardWidget(
+                      card: hand[i],
+                      faceUp: false,
+                      width: cardWidth,
+                      height: cardHeight,
                     ),
-                  )
-                  .toList(),
+                  ),
+              ],
+            ),
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      // Horizontal stack for top/bottom
+      double stackWidth = cardWidth + (hand.length - 1) * cardWidth * overlap;
+      return SizedBox(
+        height: cardHeight + 8,
+        width: stackWidth,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            height: cardHeight + 8,
+            width: stackWidth,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                for (int i = 0; i < hand.length; i++)
+                  Positioned(
+                    left: i * cardWidth * overlap,
+                    child: PlayingCardWidget(
+                      card: hand[i],
+                      faceUp: false,
+                      width: cardWidth,
+                      height: cardHeight,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   Widget _buildCardCount(BuildContext context) {
