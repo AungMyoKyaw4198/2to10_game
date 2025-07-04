@@ -524,16 +524,16 @@ void main() {
     test('Completed trick display delay', () {
       gameState.startNewGame();
 
-      // Set bids first
+      // Set bids so the round can progress to playing phase
       for (int i = 0; i < 4; i++) {
         gameState.setPlayerBid(i, 1);
       }
 
-      // Play cards for first trick - use valid cards
-      final validCards0 = gameState.getValidCards(0);
-      final validCards1 = gameState.getValidCards(1);
-      final validCards2 = gameState.getValidCards(2);
-      final validCards3 = gameState.getValidCards(3);
+      // Get valid cards for each player
+      List<Card> validCards0 = gameState.getValidCards(0);
+      List<Card> validCards1 = gameState.getValidCards(1);
+      List<Card> validCards2 = gameState.getValidCards(2);
+      List<Card> validCards3 = gameState.getValidCards(3);
 
       // Play first three cards
       gameState.playCard(0, validCards0[0]);
@@ -546,11 +546,11 @@ void main() {
       // Play the fourth card (completing the trick)
       gameState.playCard(3, validCards3[0]);
 
-      // Should now be showing completed trick
+      // Should now be showing completed trick (dialog will be shown)
       expect(gameState.isShowingCompletedTrick, true);
       expect(gameState.currentRound!.isCurrentTrickComplete, true);
 
-      // Manually complete the trick
+      // Manually complete the trick (simulating dialog dismissal)
       gameState.completeCurrentTrick();
 
       // Should no longer be showing completed trick
@@ -762,11 +762,13 @@ void main() {
               }
             }
           }
-          // Manually complete the trick since it now has a 3-second delay
+          // Manually complete the trick since it now uses dialogs
           gameState.completeCurrentTrick();
         }
 
         gameState.completeRound();
+        // Manually start next round since completeRound no longer does this automatically
+        gameState.startNextRound();
       }
 
       expect(gameState.isGameComplete, true);

@@ -6,6 +6,8 @@ import '../providers/game_state.dart';
 import '../models/player.dart';
 import '../widgets/player_box.dart';
 import '../widgets/bid_input_widget.dart';
+import '../widgets/trick_winner_dialog.dart';
+import '../widgets/round_winner_dialog.dart';
 import '../constants/game_constants.dart';
 import '../widgets/playing_card_widget.dart';
 
@@ -28,9 +30,53 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Set up dialog callbacks
+    final gameState = Provider.of<GameState>(context, listen: false);
+    gameState.setTrickCompleteCallback(_showTrickWinnerDialog);
+    gameState.setRoundCompleteCallback(_showRoundWinnerDialog);
+  }
+
+  @override
   void dispose() {
     _confettiController.dispose();
     super.dispose();
+  }
+
+  void _showTrickWinnerDialog(String winnerName) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (context) => TrickWinnerDialog(
+            winnerName: winnerName,
+            onDismiss: () {
+              Navigator.of(context).pop();
+              // Complete the trick after dialog is dismissed
+              final gameState = Provider.of<GameState>(context, listen: false);
+              gameState.completeCurrentTrick();
+            },
+          ),
+    );
+  }
+
+  void _showRoundWinnerDialog(int roundNumber, List<Player> players) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (context) => RoundWinnerDialog(
+            roundNumber: roundNumber,
+            players: players,
+            onDismiss: () {
+              Navigator.of(context).pop();
+              // Start the next round after dialog is dismissed
+              final gameState = Provider.of<GameState>(context, listen: false);
+              gameState.startNextRound();
+            },
+          ),
+    );
   }
 
   @override

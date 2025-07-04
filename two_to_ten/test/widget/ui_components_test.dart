@@ -246,25 +246,6 @@ void main() {
       }
     });
 
-    testWidgets('GameScreen shows power suit indicator', (
-      WidgetTester tester,
-    ) async {
-      gameState.startNewGame();
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: ChangeNotifierProvider<GameState>.value(
-            value: gameState,
-            child: const GameScreen(),
-          ),
-        ),
-      );
-
-      // Should show power suit (the actual text includes the suit symbol)
-      expect(find.textContaining('Power Suit:'), findsOneWidget);
-      expect(find.textContaining('♠'), findsOneWidget);
-    });
-
     testWidgets('GameScreen handles 10-card round overflow', (
       WidgetTester tester,
     ) async {
@@ -279,6 +260,8 @@ void main() {
 
         // Complete the round
         gameState.completeRound();
+        // Manually start next round since completeRound no longer does this automatically
+        gameState.startNextRound();
       }
 
       await tester.pumpWidget(

@@ -44,12 +44,14 @@ void main() {
               }
             }
           }
-          // Manually complete the trick since it now has a 3-second delay
+          // Manually complete the trick since it now uses dialogs
           gameState.completeCurrentTrick();
         }
 
         // Complete the round
         gameState.completeRound();
+        // Manually start next round since completeRound no longer does this automatically
+        gameState.startNextRound();
 
         // Verify round progression
         if (round < GameConstants.maxRound) {
@@ -229,11 +231,13 @@ void main() {
               }
             }
           }
-          // Manually complete the trick since it now has a 3-second delay
+          // Manually complete the trick since it now uses dialogs
           gameState.completeCurrentTrick();
         }
 
         gameState.completeRound();
+        // Manually start next round since completeRound no longer does this automatically
+        gameState.startNextRound();
 
         // Verify scores persist
         for (int i = 0; i < 4; i++) {
@@ -259,6 +263,8 @@ void main() {
           gameState.setPlayerBid(i, 1);
         }
         gameState.completeRound();
+        // Manually start next round since completeRound no longer does this automatically
+        gameState.startNextRound();
       }
 
       // Power suits should be different (though random, we can check they're valid)
@@ -292,11 +298,13 @@ void main() {
             }
           }
         }
-        // Manually complete the trick since it now has a 3-second delay
+        // Manually complete the trick since it now uses dialogs
         gameState.completeCurrentTrick();
       }
 
       gameState.completeRound();
+      // Manually start next round since completeRound no longer does this automatically
+      gameState.startNextRound();
 
       // Round 3: Player 1 should be dealer, Player 1 should start
       expect(gameState.currentDealer, 1);
@@ -319,11 +327,13 @@ void main() {
             }
           }
         }
-        // Manually complete the trick since it now has a 3-second delay
+        // Manually complete the trick since it now uses dialogs
         gameState.completeCurrentTrick();
       }
 
       gameState.completeRound();
+      // Manually start next round since completeRound no longer does this automatically
+      gameState.startNextRound();
 
       // Round 4: Player 2 should be dealer, Player 2 should start
       expect(gameState.currentDealer, 2);
@@ -346,11 +356,13 @@ void main() {
             }
           }
         }
-        // Manually complete the trick since it now has a 3-second delay
+        // Manually complete the trick since it now uses dialogs
         gameState.completeCurrentTrick();
       }
 
       gameState.completeRound();
+      // Manually start next round since completeRound no longer does this automatically
+      gameState.startNextRound();
 
       // Round 5: Player 3 should be dealer, Player 3 should start
       expect(gameState.currentDealer, 3);
@@ -373,11 +385,13 @@ void main() {
             }
           }
         }
-        // Manually complete the trick since it now has a 3-second delay
+        // Manually complete the trick since it now uses dialogs
         gameState.completeCurrentTrick();
       }
 
       gameState.completeRound();
+      // Manually start next round since completeRound no longer does this automatically
+      gameState.startNextRound();
 
       // Round 6: Player 0 should be dealer again, Player 0 should start
       expect(gameState.currentDealer, 0);

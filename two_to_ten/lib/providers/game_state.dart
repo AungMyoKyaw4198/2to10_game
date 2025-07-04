@@ -15,7 +15,10 @@ class GameState extends ChangeNotifier {
   int _currentDealer = 0; // Track current dealer (0-3)
   bool _isShowingCompletedTrick =
       false; // Track if we're showing a completed trick
-  Timer? _trickDisplayTimer; // Timer for showing completed tricks
+
+  // Callback functions for showing dialogs
+  Function(String winnerName)? _onTrickComplete;
+  Function(int roundNumber, List<Player> players)? _onRoundComplete;
 
   // Getters
   List<Player> get players => _players;
@@ -29,6 +32,18 @@ class GameState extends ChangeNotifier {
 
   GameState() {
     _initializePlayers();
+  }
+
+  // Set callback for trick completion dialog
+  void setTrickCompleteCallback(Function(String winnerName) callback) {
+    _onTrickComplete = callback;
+  }
+
+  // Set callback for round completion dialog
+  void setRoundCompleteCallback(
+    Function(int roundNumber, List<Player> players) callback,
+  ) {
+    _onRoundComplete = callback;
   }
 
   // Initialize players with default names
@@ -138,18 +153,19 @@ class GameState extends ChangeNotifier {
     try {
       _currentRound = _currentRound!.addCardToTrick(card, playerIndex);
 
-      // If trick is complete, show it for 3 seconds before moving to next trick
+      // If trick is complete, show trick winner dialog
       if (_currentRound!.isCurrentTrickComplete) {
         _isShowingCompletedTrick = true;
         notifyListeners();
 
-        // Cancel any existing timer
-        _trickDisplayTimer?.cancel();
+        // Determine trick winner
+        int winnerIndex = _determineTrickWinner();
+        String winnerName = GameConstants.defaultPlayerNames[winnerIndex];
 
-        // Set timer to complete the trick after 3 seconds
-        _trickDisplayTimer = Timer(const Duration(seconds: 3), () {
-          completeCurrentTrick();
-        });
+        // Show trick winner dialog
+        if (_onTrickComplete != null) {
+          _onTrickComplete!(winnerName);
+        }
       }
 
       notifyListeners();
@@ -160,7 +176,42 @@ class GameState extends ChangeNotifier {
     }
   }
 
-  // Complete the current trick and move to next
+  // Determine the winner of the current trick (copied from Round class)
+  int _determineTrickWinner() {
+    if (_currentRound == null || _currentRound!.currentTrick.length != 4)
+      return -1;
+
+    String leadSuit = _currentRound!.currentTrick[0].suit;
+    String powerSuit = _currentRound!.powerSuit;
+    int winnerIndex = 0;
+    Card winningCard = _currentRound!.currentTrick[0];
+
+    for (int i = 1; i < _currentRound!.currentTrick.length; i++) {
+      Card card = _currentRound!.currentTrick[i];
+
+      // Power suit beats all other suits
+      if (card.suit == powerSuit && winningCard.suit != powerSuit) {
+        winnerIndex = i;
+        winningCard = card;
+      } else if (card.suit == powerSuit && winningCard.suit == powerSuit) {
+        // Both are power suit, compare values
+        if (card.value > winningCard.value) {
+          winnerIndex = i;
+          winningCard = card;
+        }
+      } else if (card.suit == leadSuit && winningCard.suit != powerSuit) {
+        // Both follow lead suit, compare values
+        if (card.value > winningCard.value) {
+          winnerIndex = i;
+          winningCard = card;
+        }
+      }
+    }
+
+    return winnerIndex;
+  }
+
+  // Complete the current trick and move to next (called from dialog)
   void completeCurrentTrick() {
     if (_currentRound == null) return;
 
@@ -192,12 +243,21 @@ class GameState extends ChangeNotifier {
   void completeRound() {
     if (_currentRound == null || !_currentRound!.areAllTricksComplete) return;
 
-    // Cancel any active trick display timer
-    _trickDisplayTimer?.cancel();
     _isShowingCompletedTrick = false;
 
     _currentRound = _currentRound!.markComplete();
     _calculateRoundScores();
+
+    // Show round winner dialog
+    if (_onRoundComplete != null) {
+      _onRoundComplete!(_currentRoundNumber, _players);
+    }
+
+    // Don't start new round yet - wait for dialog dismissal
+  }
+
+  // Start the next round (called from round completion dialog)
+  void startNextRound() {
     _currentRoundNumber++;
 
     // Rotate dealer clockwise for next round
@@ -312,7 +372,6 @@ class GameState extends ChangeNotifier {
   // Dispose method to clean up timers
   @override
   void dispose() {
-    _trickDisplayTimer?.cancel();
     super.dispose();
   }
 }
