@@ -2,7 +2,7 @@ import 'card.dart';
 
 class Round {
   final int roundNumber;
-  final String powerSuit;
+  final Card powerCard; // Changed from powerSuit to powerCard
   final List<List<Card>> playerHands;
   final List<Card> currentTrick;
   final List<int> currentTrickPlayers; // Track which player played each card
@@ -14,7 +14,7 @@ class Round {
 
   Round({
     required this.roundNumber,
-    required this.powerSuit,
+    required this.powerCard, // Changed from powerSuit to powerCard
     required this.playerHands,
     List<Card>? currentTrick,
     List<int>? currentTrickPlayers,
@@ -29,6 +29,9 @@ class Round {
        bids =
            bids ??
            List.filled(4, -1); // Initialize as -1 to indicate "not bid yet"
+
+  // Get the power suit from the power card
+  String get powerSuit => powerCard.suit;
 
   // Get the number of cards per player for this round
   int get cardsPerPlayer => roundNumber;
@@ -55,86 +58,81 @@ class Round {
 
   // Check if a player can follow suit (has cards of the lead suit)
   bool canFollowSuit(int playerIndex) {
-    if (currentTrick.isEmpty)
-      return true; // First card of the trick, can play anything
-
+    if (currentTrick.isEmpty) return true; // No lead suit yet
     String leadSuit = currentTrick[0].suit;
-    List<Card> playerHand = playerHands[playerIndex];
-
-    return playerHand.any((card) => card.suit == leadSuit);
+    return playerHands[playerIndex].any((card) => card.suit == leadSuit);
   }
 
   // Get valid cards that a player can play
   List<Card> getValidCards(int playerIndex) {
     if (currentTrick.isEmpty) {
-      // First card of the trick, can play any card
+      // First player can play any card
       return List.from(playerHands[playerIndex]);
     }
 
     String leadSuit = currentTrick[0].suit;
-    List<Card> playerHand = playerHands[playerIndex];
-
-    // Check if player has cards of the lead suit
     List<Card> cardsOfLeadSuit =
-        playerHand.where((card) => card.suit == leadSuit).toList();
+        playerHands[playerIndex]
+            .where((card) => card.suit == leadSuit)
+            .toList();
 
     if (cardsOfLeadSuit.isNotEmpty) {
-      // Must follow suit - only allow cards of the lead suit
+      // Must follow suit
       return cardsOfLeadSuit;
     } else {
-      // Cannot follow suit - can play any card
-      return List.from(playerHand);
+      // Can play any card
+      return List.from(playerHands[playerIndex]);
     }
   }
 
-  // Validate if a card can be played by a player
+  // Check if a card is valid for a player to play
   bool isValidCardPlay(Card card, int playerIndex) {
-    List<Card> validCards = getValidCards(playerIndex);
-    return validCards.contains(card);
+    return getValidCards(playerIndex).contains(card);
   }
 
   // Add a card to the current trick
   Round addCardToTrick(Card card, int playerIndex) {
-    // Validate the card play
     if (!isValidCardPlay(card, playerIndex)) {
       throw ArgumentError('Invalid card play: $card by player $playerIndex');
     }
 
-    List<Card> newCurrentTrick = List.from(currentTrick);
-    newCurrentTrick.add(card);
+    List<Card> newCurrentTrick = List.from(currentTrick)..add(card);
+    List<int> newCurrentTrickPlayers = List.from(currentTrickPlayers)
+      ..add(playerIndex);
 
-    List<int> newCurrentTrickPlayers = List.from(currentTrickPlayers);
-    newCurrentTrickPlayers.add(playerIndex);
-
-    // Remove card from player's hand
+    // Remove the card from the player's hand
     List<List<Card>> newPlayerHands =
-        playerHands.map((hand) => List<Card>.from(hand)).toList();
-    newPlayerHands[playerIndex].remove(card);
+        playerHands.map((hand) {
+          List<Card> newHand = List.from(hand);
+          newHand.remove(card);
+          return newHand;
+        }).toList();
 
     return copyWith(
-      playerHands: newPlayerHands,
       currentTrick: newCurrentTrick,
       currentTrickPlayers: newCurrentTrickPlayers,
+      playerHands: newPlayerHands,
     );
   }
 
-  // Complete the current trick and determine winner
+  // Complete the current trick and move to the next
   Round completeCurrentTrick() {
-    if (!isCurrentTrickComplete) return this;
+    if (!isCurrentTrickComplete) {
+      throw StateError('Cannot complete incomplete trick');
+    }
 
     int winnerIndex = determineTrickWinner();
-    List<int> newTrickWinners = List.from(trickWinners);
-    newTrickWinners.add(winnerIndex);
+    List<int> newTrickWinners = List.from(trickWinners)..add(winnerIndex);
 
     return copyWith(
       currentTrick: [],
       currentTrickPlayers: [],
-      trickWinners: newTrickWinners,
       currentTrickIndex: currentTrickIndex + 1,
+      trickWinners: newTrickWinners,
     );
   }
 
-  /// Public method to determine the winner of a trick
+  // Determine the winner of a trick
   int determineTrickWinner([List<Card>? trick, List<int>? trickPlayers]) {
     final cards = trick ?? currentTrick;
     final players = trickPlayers ?? currentTrickPlayers;
@@ -150,16 +148,17 @@ class Round {
       int currentPlayerIndex = players[i]; // Use actual player index
 
       // Power suit beats all other suits
-      if (card.suit == powerSuit && winningCard.suit != powerSuit) {
+      if (card.suit == powerCard.suit && winningCard.suit != powerCard.suit) {
         winnerIndex = currentPlayerIndex;
         winningCard = card;
-      } else if (card.suit == powerSuit && winningCard.suit == powerSuit) {
-        // Both are power suit, compare values
-        if (card.value > winningCard.value) {
+      } else if (card.suit == powerCard.suit &&
+          winningCard.suit == powerCard.suit) {
+        // Both are power suit, compare values using power card ranking
+        if (_comparePowerSuitCards(card, winningCard) > 0) {
           winnerIndex = currentPlayerIndex;
           winningCard = card;
         }
-      } else if (card.suit == leadSuit && winningCard.suit != powerSuit) {
+      } else if (card.suit == leadSuit && winningCard.suit != powerCard.suit) {
         // Both follow lead suit, compare values
         if (card.value > winningCard.value) {
           winnerIndex = currentPlayerIndex;
@@ -168,6 +167,47 @@ class Round {
       }
     }
     return winnerIndex;
+  }
+
+  // Compare two cards of the power suit using the power card's rank as highest
+  int _comparePowerSuitCards(Card card1, Card card2) {
+    if (card1.suit != powerCard.suit || card2.suit != powerCard.suit) {
+      throw ArgumentError('Both cards must be of the power suit');
+    }
+
+    // If either card is the power card, it wins
+    if (card1.rank == powerCard.rank && card2.rank != powerCard.rank) {
+      return 1; // card1 wins
+    }
+    if (card2.rank == powerCard.rank && card1.rank != powerCard.rank) {
+      return -1; // card2 wins
+    }
+    if (card1.rank == powerCard.rank && card2.rank == powerCard.rank) {
+      return 0; // tie (shouldn't happen in practice)
+    }
+
+    // For other cards in the power suit, use normal ranking
+    // but treat the power card's rank as the highest
+    int card1Value = _getPowerSuitCardValue(card1);
+    int card2Value = _getPowerSuitCardValue(card2);
+
+    return card1Value.compareTo(card2Value);
+  }
+
+  // Get the value of a card in the power suit, considering the power card as highest
+  int _getPowerSuitCardValue(Card card) {
+    if (card.rank == powerCard.rank) {
+      return 15; // Power card is highest
+    }
+
+    // For other cards, use normal ranking but ensure power card rank is treated as highest
+    int normalValue = card.value;
+    int powerCardNormalValue = powerCard.value;
+
+    if (normalValue >= powerCardNormalValue) {
+      return normalValue + 1; // Shift up to make room for power card
+    }
+    return normalValue;
   }
 
   // Get the first player to bid/play (dealer starts for first trick, then winner of previous trick)
@@ -195,7 +235,7 @@ class Round {
   // Create a copy of the round with updated values
   Round copyWith({
     int? roundNumber,
-    String? powerSuit,
+    Card? powerCard, // Changed from powerSuit to powerCard
     List<List<Card>>? playerHands,
     List<Card>? currentTrick,
     List<int>? currentTrickPlayers,
@@ -207,7 +247,8 @@ class Round {
   }) {
     return Round(
       roundNumber: roundNumber ?? this.roundNumber,
-      powerSuit: powerSuit ?? this.powerSuit,
+      powerCard:
+          powerCard ?? this.powerCard, // Changed from powerSuit to powerCard
       playerHands:
           playerHands ??
           this.playerHands.map((hand) => List<Card>.from(hand)).toList(),
@@ -226,7 +267,10 @@ class Round {
   Map<String, dynamic> toJson() {
     return {
       'roundNumber': roundNumber,
-      'powerSuit': powerSuit,
+      'powerCard': {
+        'suit': powerCard.suit,
+        'rank': powerCard.rank,
+      }, // Changed from powerSuit
       'playerHands':
           playerHands
               .map(
@@ -253,7 +297,11 @@ class Round {
   factory Round.fromJson(Map<String, dynamic> json) {
     return Round(
       roundNumber: json['roundNumber'] as int,
-      powerSuit: json['powerSuit'] as String,
+      powerCard: Card(
+        // Changed from powerSuit
+        suit: json['powerCard']['suit'] as String,
+        rank: json['powerCard']['rank'] as String,
+      ),
       playerHands:
           (json['playerHands'] as List)
               .map(

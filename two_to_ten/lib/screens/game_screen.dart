@@ -271,7 +271,7 @@ class _GameScreenState extends State<GameScreen> {
           // Power suit display
           if (gameState.currentRound != null) ...[
             Text(
-              'Power Suit: ${gameState.currentRound!.powerSuit}',
+              'Power Card: ${gameState.currentRound!.powerCard.displayString}',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Colors.white,
                 fontSize: 20,

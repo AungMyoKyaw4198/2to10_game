@@ -79,13 +79,16 @@ class GameState extends ChangeNotifier {
     // Deal cards for the current round
     List<List<Card>> playerHands = _dealCards(_currentRoundNumber);
 
-    // Select random power suit
+    // Select random power card
     String powerSuit =
         GameConstants.suits[Random().nextInt(GameConstants.suits.length)];
+    String powerRank =
+        GameConstants.ranks[Random().nextInt(GameConstants.ranks.length)];
+    Card powerCard = Card(suit: powerSuit, rank: powerRank);
 
     _currentRound = Round(
       roundNumber: _currentRoundNumber,
-      powerSuit: powerSuit,
+      powerCard: powerCard, // Changed from powerSuit to powerCard
       playerHands: playerHands,
       dealer: _currentDealer,
     );

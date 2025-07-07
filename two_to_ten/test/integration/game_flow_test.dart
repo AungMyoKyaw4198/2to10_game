@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:two_to_ten/providers/game_state.dart';
 import 'package:two_to_ten/constants/game_constants.dart';
+import 'package:two_to_ten/models/card.dart';
 
 void main() {
   group('Complete Game Flow Tests', () {
@@ -248,15 +249,22 @@ void main() {
       expect(gameState.currentRoundNumber, 5);
     });
 
-    test('Power suit changes each round', () {
+    test('Power card changes each round', () {
       gameState.startNewGame();
 
-      final powerSuits = <String>{};
+      final powerCards = <Card>{};
 
-      // Check power suits for first 5 rounds
+      // Check power cards for first 5 rounds
       for (int round = 2; round <= 6; round++) {
-        expect(gameState.currentRound!.powerSuit, isIn(GameConstants.suits));
-        powerSuits.add(gameState.currentRound!.powerSuit);
+        expect(
+          gameState.currentRound!.powerCard.suit,
+          isIn(GameConstants.suits),
+        );
+        expect(
+          gameState.currentRound!.powerCard.rank,
+          isIn(GameConstants.ranks),
+        );
+        powerCards.add(gameState.currentRound!.powerCard);
 
         // Complete round to move to next
         for (int i = 0; i < 4; i++) {
@@ -267,10 +275,11 @@ void main() {
         gameState.startNextRound();
       }
 
-      // Power suits should be different (though random, we can check they're valid)
-      expect(powerSuits.length, greaterThan(0));
-      for (String suit in powerSuits) {
-        expect(suit, isIn(GameConstants.suits));
+      // Power cards should be different (though random, we can check they're valid)
+      expect(powerCards.length, greaterThan(0));
+      for (Card powerCard in powerCards) {
+        expect(powerCard.suit, isIn(GameConstants.suits));
+        expect(powerCard.rank, isIn(GameConstants.ranks));
       }
     });
 

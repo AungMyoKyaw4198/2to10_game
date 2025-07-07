@@ -78,13 +78,20 @@ void main() {
     test('Round creation with default values', () {
       final round = Round(
         roundNumber: 5,
-        powerSuit: '♠',
+        powerCard: Card(
+          suit: '♠',
+          rank: 'A',
+        ), // Changed from powerSuit to powerCard
         playerHands: List.generate(4, (_) => []),
         dealer: 0,
       );
 
       expect(round.roundNumber, 5);
-      expect(round.powerSuit, '♠');
+      expect(
+        round.powerCard.suit,
+        '♠',
+      ); // Changed from powerSuit to powerCard.suit
+      expect(round.powerCard.rank, 'A'); // New: check power card rank
       expect(round.cardsPerPlayer, 5);
       expect(round.totalTricks, 5);
       expect(round.bids, List.filled(4, -1));
@@ -98,7 +105,10 @@ void main() {
     test('Bid placement and tracking', () {
       final round = Round(
         roundNumber: 3,
-        powerSuit: '♥',
+        powerCard: Card(
+          suit: '♥',
+          rank: 'K',
+        ), // Changed from powerSuit to powerCard
         playerHands: List.generate(4, (_) => []),
         dealer: 1,
       );
@@ -119,7 +129,10 @@ void main() {
     test('Trick completion and winner determination', () {
       final round = Round(
         roundNumber: 2,
-        powerSuit: '♠',
+        powerCard: Card(
+          suit: '♠',
+          rank: 'A',
+        ), // Changed from powerSuit to powerCard
         playerHands: [
           [Card(suit: '♥', rank: 'A')], // Player 0 has hearts
           [Card(suit: '♥', rank: 'K')], // Player 1 has hearts
@@ -149,7 +162,10 @@ void main() {
     test('Power suit beats all other suits', () {
       final round = Round(
         roundNumber: 2,
-        powerSuit: '♣',
+        powerCard: Card(
+          suit: '♣',
+          rank: 'K',
+        ), // Changed from powerSuit to powerCard
         playerHands: [
           [Card(suit: '♥', rank: 'A')], // Player 0 has hearts
           [Card(suit: '♥', rank: 'K')], // Player 1 has hearts
@@ -175,7 +191,10 @@ void main() {
     test('Power suit vs power suit comparison', () {
       final round = Round(
         roundNumber: 2,
-        powerSuit: '♠',
+        powerCard: Card(
+          suit: '♠',
+          rank: 'A',
+        ), // Changed from powerSuit to powerCard
         playerHands: [
           [Card(suit: '♥', rank: 'A')], // Player 0 has hearts
           [Card(suit: '♠', rank: 'K')], // Player 1 has spades
@@ -198,7 +217,10 @@ void main() {
     test('Follow suit rule - must follow lead suit if able', () {
       final round = Round(
         roundNumber: 3,
-        powerSuit: '♠',
+        powerCard: Card(
+          suit: '♠',
+          rank: 'A',
+        ), // Changed from powerSuit to powerCard
         playerHands: [
           [Card(suit: '♥', rank: 'A')], // Player 0 has hearts
           [
@@ -235,7 +257,10 @@ void main() {
       // Test different dealers
       final round1 = Round(
         roundNumber: 2,
-        powerSuit: '♠',
+        powerCard: Card(
+          suit: '♠',
+          rank: 'A',
+        ), // Changed from powerSuit to powerCard
         playerHands: List.generate(4, (_) => []),
         dealer: 0,
       );
@@ -243,7 +268,10 @@ void main() {
 
       final round2 = Round(
         roundNumber: 2,
-        powerSuit: '♠',
+        powerCard: Card(
+          suit: '♠',
+          rank: 'A',
+        ), // Changed from powerSuit to powerCard
         playerHands: List.generate(4, (_) => []),
         dealer: 1,
       );
@@ -251,7 +279,10 @@ void main() {
 
       final round3 = Round(
         roundNumber: 2,
-        powerSuit: '♠',
+        powerCard: Card(
+          suit: '♠',
+          rank: 'A',
+        ), // Changed from powerSuit to powerCard
         playerHands: List.generate(4, (_) => []),
         dealer: 2,
       );
@@ -259,7 +290,10 @@ void main() {
 
       final round4 = Round(
         roundNumber: 2,
-        powerSuit: '♠',
+        powerCard: Card(
+          suit: '♠',
+          rank: 'A',
+        ), // Changed from powerSuit to powerCard
         playerHands: List.generate(4, (_) => []),
         dealer: 3,
       );
@@ -270,7 +304,10 @@ void main() {
       // Test all the rules comprehensively
       final round = Round(
         roundNumber: 4,
-        powerSuit: '♠', // Spades is power suit
+        powerCard: Card(
+          suit: '♠',
+          rank: 'A',
+        ), // Changed from powerSuit to powerCard
         playerHands: [
           [Card(suit: '♥', rank: 'A')], // Player 0: leads with hearts
           [
@@ -337,7 +374,10 @@ void main() {
     test('Trick winning rules - highest lead suit wins when no power suit', () {
       final round = Round(
         roundNumber: 4,
-        powerSuit: '♠', // Spades is power suit
+        powerCard: Card(
+          suit: '♠',
+          rank: 'A',
+        ), // Changed from powerSuit to powerCard
         playerHands: [
           [Card(suit: '♥', rank: 'A')], // Player 0: leads with hearts
           [Card(suit: '♥', rank: 'K')], // Player 1: has hearts
@@ -364,7 +404,10 @@ void main() {
       () {
         final round = Round(
           roundNumber: 4,
-          powerSuit: '♠', // Spades is power suit
+          powerCard: Card(
+            suit: '♠',
+            rank: 'A',
+          ), // Changed from powerSuit to powerCard
           playerHands: [
             [Card(suit: '♥', rank: 'A')], // Player 0: leads with hearts
             [Card(suit: '♥', rank: 'K')], // Player 1: has hearts
@@ -397,7 +440,10 @@ void main() {
       () {
         final round = Round(
           roundNumber: 4,
-          powerSuit: '♠', // Spades is power suit
+          powerCard: Card(
+            suit: '♠',
+            rank: 'A',
+          ), // Changed from powerSuit to powerCard
           playerHands: [
             [Card(suit: '♥', rank: 'A')], // Player 0: leads with hearts
             [Card(suit: '♠', rank: 'K')], // Player 1: has power suit
@@ -465,8 +511,8 @@ void main() {
     test('Bid placement', () {
       gameState.startNewGame();
 
-      // Reveal power suit first
-      gameState.revealPowerSuit();
+      // Enable bidding first
+      gameState.enableBidding();
 
       gameState.setPlayerBid(0, 2);
       gameState.setPlayerBid(1, 1);
@@ -483,8 +529,8 @@ void main() {
     test('Card playing and trick completion', () {
       gameState.startNewGame();
 
-      // Reveal power suit first
-      gameState.revealPowerSuit();
+      // Enable bidding first
+      gameState.enableBidding();
 
       // Set bids first
       for (int i = 0; i < 4; i++) {
@@ -530,8 +576,8 @@ void main() {
     test('Completed trick display delay', () {
       gameState.startNewGame();
 
-      // Reveal power suit first
-      gameState.revealPowerSuit();
+      // Enable bidding first
+      gameState.enableBidding();
 
       // Set bids so the round can progress to playing phase
       for (int i = 0; i < 4; i++) {
@@ -580,8 +626,8 @@ void main() {
     test('Exact bid scoring logic', () {
       gameState.startNewGame();
 
-      // Reveal power suit first
-      gameState.revealPowerSuit();
+      // Enable bidding first
+      gameState.enableBidding();
 
       // Set bids
       gameState.setPlayerBid(0, 2);
@@ -760,7 +806,7 @@ void main() {
         expect(gameState.currentRound!.playerHands[0].length, round);
 
         // Reveal power suit first
-        gameState.revealPowerSuit();
+        gameState.enableBidding();
 
         // Set bids and complete round
         for (int i = 0; i < 4; i++) {
