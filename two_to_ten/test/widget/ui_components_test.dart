@@ -136,6 +136,9 @@ void main() {
     testWidgets('BidInputWidget shows dialog for bidding', (
       WidgetTester tester,
     ) async {
+      // Enable bidding first
+      gameState.enableBidding();
+
       await tester.pumpWidget(
         MaterialApp(
           home: ChangeNotifierProvider<GameState>.value(
@@ -161,6 +164,9 @@ void main() {
     testWidgets('BidInputWidget allows bid selection', (
       WidgetTester tester,
     ) async {
+      // Enable bidding first
+      gameState.enableBidding();
+
       await tester.pumpWidget(
         MaterialApp(
           home: ChangeNotifierProvider<GameState>.value(
@@ -246,6 +252,37 @@ void main() {
       }
     });
 
+    testWidgets('GameScreen shows Start Round button before bidding enabled', (
+      WidgetTester tester,
+    ) async {
+      gameState.startNewGame();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ChangeNotifierProvider<GameState>.value(
+            value: gameState,
+            child: const GameScreen(),
+          ),
+        ),
+      );
+
+      // Should show Start Round button initially
+      expect(find.text('Start Round'), findsOneWidget);
+
+      // Should show power suit immediately
+      expect(find.textContaining('Power Suit:'), findsOneWidget);
+
+      // Tap Start Round button
+      await tester.tap(find.text('Start Round'));
+      await tester.pumpAndSettle();
+
+      // Should still show power suit
+      expect(find.textContaining('Power Suit:'), findsOneWidget);
+
+      // Should show bid dialog after bidding is enabled
+      expect(find.text('Alex - Enter your bid'), findsOneWidget);
+    });
+
     testWidgets('GameScreen handles 10-card round overflow', (
       WidgetTester tester,
     ) async {
@@ -292,6 +329,8 @@ void main() {
       WidgetTester tester,
     ) async {
       gameState.startNewGame();
+      // Enable bidding first
+      gameState.enableBidding();
 
       await tester.pumpWidget(
         MaterialApp(

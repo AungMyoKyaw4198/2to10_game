@@ -465,6 +465,9 @@ void main() {
     test('Bid placement', () {
       gameState.startNewGame();
 
+      // Reveal power suit first
+      gameState.revealPowerSuit();
+
       gameState.setPlayerBid(0, 2);
       gameState.setPlayerBid(1, 1);
       gameState.setPlayerBid(2, 0);
@@ -479,6 +482,9 @@ void main() {
 
     test('Card playing and trick completion', () {
       gameState.startNewGame();
+
+      // Reveal power suit first
+      gameState.revealPowerSuit();
 
       // Set bids first
       for (int i = 0; i < 4; i++) {
@@ -524,26 +530,31 @@ void main() {
     test('Completed trick display delay', () {
       gameState.startNewGame();
 
+      // Reveal power suit first
+      gameState.revealPowerSuit();
+
       // Set bids so the round can progress to playing phase
       for (int i = 0; i < 4; i++) {
         gameState.setPlayerBid(i, 1);
       }
 
-      // Get valid cards for each player
+      // Play first card
       List<Card> validCards0 = gameState.getValidCards(0);
-      List<Card> validCards1 = gameState.getValidCards(1);
-      List<Card> validCards2 = gameState.getValidCards(2);
-      List<Card> validCards3 = gameState.getValidCards(3);
-
-      // Play first three cards
       gameState.playCard(0, validCards0[0]);
+
+      // Play second card
+      List<Card> validCards1 = gameState.getValidCards(1);
       gameState.playCard(1, validCards1[0]);
+
+      // Play third card
+      List<Card> validCards2 = gameState.getValidCards(2);
       gameState.playCard(2, validCards2[0]);
 
       // Should not be showing completed trick yet
       expect(gameState.isShowingCompletedTrick, false);
 
       // Play the fourth card (completing the trick)
+      List<Card> validCards3 = gameState.getValidCards(3);
       gameState.playCard(3, validCards3[0]);
 
       // Should now be showing completed trick (dialog will be shown)
@@ -568,6 +579,9 @@ void main() {
 
     test('Exact bid scoring logic', () {
       gameState.startNewGame();
+
+      // Reveal power suit first
+      gameState.revealPowerSuit();
 
       // Set bids
       gameState.setPlayerBid(0, 2);
@@ -744,6 +758,9 @@ void main() {
         expect(gameState.currentRoundNumber, round);
         expect(gameState.currentRound!.roundNumber, round);
         expect(gameState.currentRound!.playerHands[0].length, round);
+
+        // Reveal power suit first
+        gameState.revealPowerSuit();
 
         // Set bids and complete round
         for (int i = 0; i < 4; i++) {

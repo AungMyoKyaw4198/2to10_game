@@ -34,8 +34,8 @@ class _GameScreenState extends State<GameScreen> {
     super.didChangeDependencies();
     // Set up dialog callbacks
     final gameState = Provider.of<GameState>(context, listen: false);
-    gameState.setTrickCompleteCallback(_showTrickWinnerDialog);
-    gameState.setRoundCompleteCallback(_showRoundWinnerDialog);
+    gameState.onTrickComplete = _showTrickWinnerDialog;
+    gameState.onRoundComplete = _showRoundWinnerDialog;
   }
 
   @override
@@ -279,148 +279,43 @@ class _GameScreenState extends State<GameScreen> {
             ),
 
             const SizedBox(height: 16),
+          ],
 
-            // Current trick display
-            if (gameState.currentRound!.currentTrick.isNotEmpty) ...[
-              Text(
-                gameState.isShowingCompletedTrick
-                    ? 'Completed Trick:'
-                    : 'Current Trick:',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall?.copyWith(color: Colors.white70),
+          // Game controls
+          if (!gameState.isBiddingEnabled) ...[
+            // Show "Start Round" button to enable bidding
+            ElevatedButton(
+              onPressed: () => gameState.enableBidding(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Color(GameConstants.greenFeltColor),
               ),
-              const SizedBox(height: 8),
-              // Display cards in a 2x2 grid to prevent overflow
-              Column(
-                children: [
-                  // First row (cards 0 and 1)
-                  if (gameState.currentRound!.currentTrick.length >= 1)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 2),
-                          child: PlayingCardWidget(
-                            card: gameState.currentRound!.currentTrick[0],
-                            faceUp: true,
-                            width: 40,
-                            height: 56,
-                          ),
-                        ),
-                        if (gameState.currentRound!.currentTrick.length >= 2)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 2),
-                            child: PlayingCardWidget(
-                              card: gameState.currentRound!.currentTrick[1],
-                              faceUp: true,
-                              width: 40,
-                              height: 56,
-                            ),
-                          ),
-                      ],
-                    ),
-                  // Second row (cards 2 and 3)
-                  if (gameState.currentRound!.currentTrick.length >= 3)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 2),
-                            child: PlayingCardWidget(
-                              card: gameState.currentRound!.currentTrick[2],
-                              faceUp: true,
-                              width: 40,
-                              height: 56,
-                            ),
-                          ),
-                          if (gameState.currentRound!.currentTrick.length >= 4)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 2,
-                              ),
-                              child: PlayingCardWidget(
-                                card: gameState.currentRound!.currentTrick[3],
-                                faceUp: true,
-                                width: 40,
-                                height: 56,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                ],
+              child: const Text('Start Round'),
+            ),
+          ] else if (!gameState.currentRound!.allBidsPlaced) ...[
+            // Show bid input after bidding is enabled
+            BidInputWidget(
+              currentRound: gameState.currentRound!,
+              onBidSubmitted:
+                  (playerIndex, bid) =>
+                      gameState.setPlayerBid(playerIndex, bid),
+            ),
+          ] else if (gameState.currentRound!.areAllTricksComplete) ...[
+            ElevatedButton(
+              onPressed: () => gameState.completeRound(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Color(GameConstants.greenFeltColor),
               ),
-
-              // Show winner indicator when trick is complete
-              // if (gameState.isShowingCompletedTrick &&
-              //     gameState.currentRound!.trickWinners.isNotEmpty) ...[
-              //   // const SizedBox(height: 8),
-              //   Container(
-              //     padding: const EdgeInsets.symmetric(
-              //       horizontal: 12,
-              //       vertical: 6,
-              //     ),
-              //     decoration: BoxDecoration(
-              //       color: Colors.amber.withValues(alpha: 0.8),
-              //       borderRadius: BorderRadius.circular(16),
-              //       boxShadow: [
-              //         BoxShadow(
-              //           color: Colors.amber.withValues(alpha: 0.4),
-              //           blurRadius: 8,
-              //           spreadRadius: 2,
-              //         ),
-              //       ],
-              //     ),
-              //     child: Text(
-              //       'Winner: ${GameConstants.defaultPlayerNames[gameState.currentRound!.trickWinners.last]}',
-              //       style: const TextStyle(
-              //         color: Colors.black,
-              //         fontWeight: FontWeight.bold,
-              //         fontSize: 14,
-              //       ),
-              //     ),
-              //   ),
-              //   const SizedBox(height: 8),
-              //   Text(
-              //     'Moving to next trick in 3 seconds...',
-              //     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              //       color: Colors.white70,
-              //       fontStyle: FontStyle.italic,
-              //     ),
-              //   ),
-              // ],
-            ],
-
-            const SizedBox(height: 16),
-
-            // Game controls
-            if (!gameState.currentRound!.allBidsPlaced) ...[
-              BidInputWidget(
-                currentRound: gameState.currentRound!,
-                onBidSubmitted:
-                    (playerIndex, bid) =>
-                        gameState.setPlayerBid(playerIndex, bid),
-              ),
-            ] else if (gameState.currentRound!.areAllTricksComplete) ...[
-              ElevatedButton(
-                onPressed: () => gameState.completeRound(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Color(GameConstants.greenFeltColor),
-                ),
-                child: const Text('Complete Round'),
-              ),
-            ] else ...[
-              Text(
-                'Playing tricks...',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(color: Colors.white70),
-              ),
-            ],
+              child: const Text('Complete Round'),
+            ),
+          ] else ...[
+            Text(
+              'Playing tricks...',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: Colors.white70),
+            ),
           ],
         ],
       ),

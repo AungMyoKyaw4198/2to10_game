@@ -10,43 +10,37 @@ class GameState extends ChangeNotifier {
   List<Player> _players = [];
   Round? _currentRound;
   int _currentRoundNumber = GameConstants.minRound;
-  bool _isGameComplete = false;
   bool _isGameStarted = false;
+  bool _isGameComplete = false;
+  bool _isShowingCompletedTrick = false;
   int _currentDealer = 0; // Track current dealer (0-3)
-  bool _isShowingCompletedTrick =
-      false; // Track if we're showing a completed trick
+  bool _isBiddingEnabled =
+      false; // Track if bidding is enabled for current round
 
-  // Callback functions for showing dialogs
-  Function(String winnerName)? _onTrickComplete;
-  Function(int roundNumber, List<Player> players)? _onRoundComplete;
+  // Callbacks for dialogs
+  Function(String)? _onTrickComplete;
+  Function(int, List<Player>)? _onRoundComplete;
 
   // Getters
   List<Player> get players => _players;
   Round? get currentRound => _currentRound;
   int get currentRoundNumber => _currentRoundNumber;
-  bool get isGameComplete => _isGameComplete;
   bool get isGameStarted => _isGameStarted;
-  bool get isGameInProgress => _isGameStarted && !_isGameComplete;
-  int get currentDealer => _currentDealer;
+  bool get isGameComplete => _isGameComplete;
   bool get isShowingCompletedTrick => _isShowingCompletedTrick;
+  int get currentDealer => _currentDealer;
+  bool get isBiddingEnabled => _isBiddingEnabled;
+
+  // Setters for callbacks
+  set onTrickComplete(Function(String)? callback) =>
+      _onTrickComplete = callback;
+  set onRoundComplete(Function(int, List<Player>)? callback) =>
+      _onRoundComplete = callback;
 
   GameState() {
     _initializePlayers();
   }
 
-  // Set callback for trick completion dialog
-  void setTrickCompleteCallback(Function(String winnerName) callback) {
-    _onTrickComplete = callback;
-  }
-
-  // Set callback for round completion dialog
-  void setRoundCompleteCallback(
-    Function(int roundNumber, List<Player> players) callback,
-  ) {
-    _onRoundComplete = callback;
-  }
-
-  // Initialize players with default names
   void _initializePlayers() {
     _players =
         GameConstants.defaultPlayerNames
@@ -96,7 +90,18 @@ class GameState extends ChangeNotifier {
       dealer: _currentDealer,
     );
 
+    // Bidding is disabled at the start of the round
+    _isBiddingEnabled = false;
+
     notifyListeners();
+  }
+
+  // Enable bidding (called when Start Round is pressed)
+  void enableBidding() {
+    if (_currentRound != null) {
+      _isBiddingEnabled = true;
+      notifyListeners();
+    }
   }
 
   // Reset player bids and tricks for a new round
