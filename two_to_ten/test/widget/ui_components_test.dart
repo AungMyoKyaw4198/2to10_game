@@ -152,7 +152,7 @@ void main() {
 
       // Should show bid dialog
       await tester.pumpAndSettle();
-      expect(find.text('Player 1 - Enter your bid'), findsOneWidget);
+      expect(find.text('Alex - Enter your bid'), findsOneWidget);
 
       // Should show bid range
       expect(find.text('Bid range: 0 - 2'), findsOneWidget);

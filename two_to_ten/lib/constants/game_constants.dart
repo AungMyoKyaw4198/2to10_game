@@ -40,10 +40,10 @@ class GameConstants {
 
   // Player names
   static const List<String> defaultPlayerNames = [
-    'Player 1',
-    'Player 2',
-    'Player 3',
-    'Player 4',
+    'Alex',
+    'James',
+    'John',
+    'Tom',
   ];
 
   // Colors

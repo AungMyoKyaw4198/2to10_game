@@ -604,7 +604,7 @@ class _GameScreenState extends State<GameScreen> {
     // Create dummy player data
     final dummyPlayers = [
       Player(
-        name: 'Player 1',
+        name: 'Alex',
         score: 85,
         bags: 2,
         currentBid: 3,
@@ -633,7 +633,7 @@ class _GameScreenState extends State<GameScreen> {
         ],
       ),
       Player(
-        name: 'Player 2',
+        name: 'James',
         score: 120,
         bags: 0,
         currentBid: 4,
@@ -652,7 +652,7 @@ class _GameScreenState extends State<GameScreen> {
         ],
       ),
       Player(
-        name: 'Player 3',
+        name: 'John',
         score: 45,
         bags: 7,
         currentBid: 2,
@@ -681,7 +681,7 @@ class _GameScreenState extends State<GameScreen> {
         ],
       ),
       Player(
-        name: 'Player 4',
+        name: 'Tom',
         score: 95,
         bags: 1,
         currentBid: 5,

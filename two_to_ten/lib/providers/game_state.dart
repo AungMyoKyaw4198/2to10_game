@@ -158,8 +158,8 @@ class GameState extends ChangeNotifier {
         _isShowingCompletedTrick = true;
         notifyListeners();
 
-        // Determine trick winner
-        int winnerIndex = _determineTrickWinner();
+        // Determine trick winner using Round's logic
+        int winnerIndex = _currentRound!.determineTrickWinner();
         String winnerName = GameConstants.defaultPlayerNames[winnerIndex];
 
         // Show trick winner dialog
@@ -176,49 +176,16 @@ class GameState extends ChangeNotifier {
     }
   }
 
-  // Determine the winner of the current trick (copied from Round class)
-  int _determineTrickWinner() {
-    if (_currentRound == null || _currentRound!.currentTrick.length != 4)
-      return -1;
-
-    String leadSuit = _currentRound!.currentTrick[0].suit;
-    String powerSuit = _currentRound!.powerSuit;
-    int winnerIndex = 0;
-    Card winningCard = _currentRound!.currentTrick[0];
-
-    for (int i = 1; i < _currentRound!.currentTrick.length; i++) {
-      Card card = _currentRound!.currentTrick[i];
-
-      // Power suit beats all other suits
-      if (card.suit == powerSuit && winningCard.suit != powerSuit) {
-        winnerIndex = i;
-        winningCard = card;
-      } else if (card.suit == powerSuit && winningCard.suit == powerSuit) {
-        // Both are power suit, compare values
-        if (card.value > winningCard.value) {
-          winnerIndex = i;
-          winningCard = card;
-        }
-      } else if (card.suit == leadSuit && winningCard.suit != powerSuit) {
-        // Both follow lead suit, compare values
-        if (card.value > winningCard.value) {
-          winnerIndex = i;
-          winningCard = card;
-        }
-      }
-    }
-
-    return winnerIndex;
-  }
-
   // Complete the current trick and move to next (called from dialog)
   void completeCurrentTrick() {
     if (_currentRound == null) return;
 
+    // Get the winner before completing the trick
+    int winnerIndex = _currentRound!.determineTrickWinner();
+
     _currentRound = _currentRound!.completeCurrentTrick();
 
     // Update trick count for the winner
-    int winnerIndex = _currentRound!.trickWinners.last;
     _players[winnerIndex] = _players[winnerIndex].copyWith(
       tricksWon: _players[winnerIndex].tricksWon + 1,
     );

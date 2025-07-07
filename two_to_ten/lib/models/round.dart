@@ -5,6 +5,7 @@ class Round {
   final String powerSuit;
   final List<List<Card>> playerHands;
   final List<Card> currentTrick;
+  final List<int> currentTrickPlayers; // Track which player played each card
   final List<int> trickWinners;
   final List<int> bids;
   final int currentTrickIndex;
@@ -16,12 +17,14 @@ class Round {
     required this.powerSuit,
     required this.playerHands,
     List<Card>? currentTrick,
+    List<int>? currentTrickPlayers,
     List<int>? trickWinners,
     List<int>? bids,
     this.currentTrickIndex = 0,
     this.isComplete = false,
     required this.dealer,
   }) : currentTrick = currentTrick ?? [],
+       currentTrickPlayers = currentTrickPlayers ?? [],
        trickWinners = trickWinners ?? [],
        bids =
            bids ??
@@ -45,6 +48,10 @@ class Round {
   // Get the lead suit of the current trick
   String? get currentLeadSuit =>
       currentTrick.isNotEmpty ? currentTrick[0].suit : null;
+
+  // Get the first player of the current trick (who leads)
+  int? get currentTrickFirstPlayer =>
+      currentTrickPlayers.isNotEmpty ? currentTrickPlayers[0] : null;
 
   // Check if a player can follow suit (has cards of the lead suit)
   bool canFollowSuit(int playerIndex) {
@@ -96,60 +103,80 @@ class Round {
     List<Card> newCurrentTrick = List.from(currentTrick);
     newCurrentTrick.add(card);
 
+    List<int> newCurrentTrickPlayers = List.from(currentTrickPlayers);
+    newCurrentTrickPlayers.add(playerIndex);
+
     // Remove card from player's hand
     List<List<Card>> newPlayerHands =
         playerHands.map((hand) => List<Card>.from(hand)).toList();
     newPlayerHands[playerIndex].remove(card);
 
-    return copyWith(playerHands: newPlayerHands, currentTrick: newCurrentTrick);
+    return copyWith(
+      playerHands: newPlayerHands,
+      currentTrick: newCurrentTrick,
+      currentTrickPlayers: newCurrentTrickPlayers,
+    );
   }
 
   // Complete the current trick and determine winner
   Round completeCurrentTrick() {
     if (!isCurrentTrickComplete) return this;
 
-    int winnerIndex = _determineTrickWinner();
+    int winnerIndex = determineTrickWinner();
     List<int> newTrickWinners = List.from(trickWinners);
     newTrickWinners.add(winnerIndex);
 
     return copyWith(
       currentTrick: [],
+      currentTrickPlayers: [],
       trickWinners: newTrickWinners,
       currentTrickIndex: currentTrickIndex + 1,
     );
   }
 
-  // Determine the winner of the current trick
-  int _determineTrickWinner() {
-    if (currentTrick.length != 4) return -1;
+  /// Public method to determine the winner of a trick
+  int determineTrickWinner([List<Card>? trick, List<int>? trickPlayers]) {
+    final cards = trick ?? currentTrick;
+    final players = trickPlayers ?? currentTrickPlayers;
 
-    String leadSuit = currentTrick[0].suit;
-    int winnerIndex = 0;
-    Card winningCard = currentTrick[0];
+    if (cards.length != 4 || players.length != 4) return -1;
 
-    for (int i = 1; i < currentTrick.length; i++) {
-      Card card = currentTrick[i];
+    String leadSuit = cards[0].suit;
+    int winnerIndex = players[0]; // Use actual player index, not 0
+    Card winningCard = cards[0];
+
+    for (int i = 1; i < cards.length; i++) {
+      Card card = cards[i];
+      int currentPlayerIndex = players[i]; // Use actual player index
 
       // Power suit beats all other suits
       if (card.suit == powerSuit && winningCard.suit != powerSuit) {
-        winnerIndex = i;
+        winnerIndex = currentPlayerIndex;
         winningCard = card;
       } else if (card.suit == powerSuit && winningCard.suit == powerSuit) {
         // Both are power suit, compare values
         if (card.value > winningCard.value) {
-          winnerIndex = i;
+          winnerIndex = currentPlayerIndex;
           winningCard = card;
         }
       } else if (card.suit == leadSuit && winningCard.suit != powerSuit) {
         // Both follow lead suit, compare values
         if (card.value > winningCard.value) {
-          winnerIndex = i;
+          winnerIndex = currentPlayerIndex;
           winningCard = card;
         }
       }
     }
-
     return winnerIndex;
+  }
+
+  // Get the first player to bid/play (dealer starts for first trick, then winner of previous trick)
+  int get firstPlayer {
+    if (trickWinners.isEmpty) {
+      return dealer; // Dealer starts the first trick
+    } else {
+      return trickWinners.last; // Winner of previous trick starts
+    }
   }
 
   // Set a player's bid
@@ -165,15 +192,13 @@ class Round {
     return copyWith(isComplete: true);
   }
 
-  // Get the first player to bid/play (dealer starts)
-  int get firstPlayer => dealer;
-
   // Create a copy of the round with updated values
   Round copyWith({
     int? roundNumber,
     String? powerSuit,
     List<List<Card>>? playerHands,
     List<Card>? currentTrick,
+    List<int>? currentTrickPlayers,
     List<int>? trickWinners,
     List<int>? bids,
     int? currentTrickIndex,
@@ -187,6 +212,8 @@ class Round {
           playerHands ??
           this.playerHands.map((hand) => List<Card>.from(hand)).toList(),
       currentTrick: currentTrick ?? List.from(this.currentTrick),
+      currentTrickPlayers:
+          currentTrickPlayers ?? List.from(this.currentTrickPlayers),
       trickWinners: trickWinners ?? List.from(this.trickWinners),
       bids: bids ?? List.from(this.bids),
       currentTrickIndex: currentTrickIndex ?? this.currentTrickIndex,
@@ -213,6 +240,7 @@ class Round {
           currentTrick
               .map((card) => {'suit': card.suit, 'rank': card.rank})
               .toList(),
+      'currentTrickPlayers': currentTrickPlayers,
       'trickWinners': trickWinners,
       'bids': bids,
       'currentTrickIndex': currentTrickIndex,
@@ -249,6 +277,7 @@ class Round {
                 ),
               )
               .toList(),
+      currentTrickPlayers: List<int>.from(json['currentTrickPlayers'] as List),
       trickWinners: List<int>.from(json['trickWinners'] as List),
       bids: List<int>.from(json['bids'] as List),
       currentTrickIndex: json['currentTrickIndex'] as int,
