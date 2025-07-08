@@ -141,19 +141,19 @@ class _GameScreenState extends State<GameScreen> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () => _showGameCompletePreview(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-            ),
-            child: const Text(
-              'Preview Summary Screen',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ),
+          // const SizedBox(height: 20),
+          // ElevatedButton(
+          //   onPressed: () => _showGameCompletePreview(context),
+          //   style: ElevatedButton.styleFrom(
+          //     backgroundColor: Colors.orange,
+          //     foregroundColor: Colors.white,
+          //     padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+          //   ),
+          //   child: const Text(
+          //     'Preview Summary Screen',
+          //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          //   ),
+          // ),
         ],
       ),
     );
