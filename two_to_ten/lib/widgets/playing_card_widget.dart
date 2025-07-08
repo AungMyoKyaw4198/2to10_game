@@ -63,7 +63,7 @@ class PlayingCardWidget extends StatelessWidget {
                     style: TextStyle(
                       color: Color(card.color),
                       fontWeight: FontWeight.bold,
-                      fontSize: width * 0.44,
+                      fontSize: width * 0.35,
                       fontFamily: 'RobotoMono',
                       letterSpacing: card.displayString.length > 2 ? -1.5 : 0,
                       shadows:
