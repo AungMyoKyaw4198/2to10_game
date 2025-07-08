@@ -45,38 +45,47 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _showTrickWinnerDialog(String winnerName) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder:
-          (context) => TrickWinnerDialog(
-            winnerName: winnerName,
-            onDismiss: () {
-              Navigator.of(context).pop();
-              // Complete the trick after dialog is dismissed
-              final gameState = Provider.of<GameState>(context, listen: false);
-              gameState.completeCurrentTrick();
-            },
-          ),
-    );
+    Future.delayed(const Duration(seconds: 2), () {
+      // Complete the trick after dialog is dismissed
+      final gameState = Provider.of<GameState>(context, listen: false);
+      gameState.completeCurrentTrick();
+    });
+    // Hide Trick Winner Dialog for now
+    // showDialog(
+    //   context: context,
+    //   barrierDismissible: false,
+    //   builder:
+    //       (context) => TrickWinnerDialog(
+    //         winnerName: winnerName,
+    //         onDismiss: () {
+    //           Navigator.of(context).pop();
+    //           // Complete the trick after dialog is dismissed
+    //           final gameState = Provider.of<GameState>(context, listen: false);
+    //           gameState.completeCurrentTrick();
+    //         },
+    //       ),
+    // );
   }
 
   void _showRoundWinnerDialog(int roundNumber, List<Player> players) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder:
-          (context) => RoundWinnerDialog(
-            roundNumber: roundNumber,
-            players: players,
-            onDismiss: () {
-              Navigator.of(context).pop();
-              // Start the next round after dialog is dismissed
-              final gameState = Provider.of<GameState>(context, listen: false);
-              gameState.startNextRound();
-            },
-          ),
-    );
+    final gameState = Provider.of<GameState>(context, listen: false);
+    gameState.startNextRound();
+    // Hide Round Winner Dialog for now
+    // showDialog(
+    //   context: context,
+    //   barrierDismissible: false,
+    //   builder:
+    //       (context) => RoundWinnerDialog(
+    //         roundNumber: roundNumber,
+    //         players: players,
+    //         onDismiss: () {
+    //           Navigator.of(context).pop();
+    //           // Start the next round after dialog is dismissed
+    //           final gameState = Provider.of<GameState>(context, listen: false);
+    //           gameState.startNextRound();
+    //         },
+    //       ),
+    // );
   }
 
   @override
