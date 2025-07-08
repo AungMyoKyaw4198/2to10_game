@@ -83,6 +83,7 @@ class _GameScreenState extends State<GameScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(GameConstants.greenFeltColor),
+
       body: Consumer<GameState>(
         builder: (context, gameState, child) {
           if (!gameState.isGameStarted) {
@@ -155,7 +156,7 @@ class _GameScreenState extends State<GameScreen> {
         children: [
           // Top player
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: PlayerBox(
@@ -171,12 +172,12 @@ class _GameScreenState extends State<GameScreen> {
 
           // Middle section with left and right players
           Expanded(
-            flex: 3,
+            flex: 2,
             child: Row(
               children: [
                 // Left player (now player 3)
                 Expanded(
-                  flex: 2,
+                  flex: 1,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: PlayerBox(
@@ -192,13 +193,13 @@ class _GameScreenState extends State<GameScreen> {
 
                 // Center game area
                 Expanded(
-                  flex: 3,
+                  flex: 2,
                   child: _buildCenterGameArea(context, gameState),
                 ),
 
                 // Right player (now player 1)
                 Expanded(
-                  flex: 2,
+                  flex: 1,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: PlayerBox(
@@ -217,7 +218,7 @@ class _GameScreenState extends State<GameScreen> {
 
           // Bottom player (now player 2)
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: PlayerBox(
@@ -237,50 +238,126 @@ class _GameScreenState extends State<GameScreen> {
 
   Widget _buildCenterGameArea(BuildContext context, GameState gameState) {
     return Container(
-      margin: const EdgeInsets.all(8.0),
+      // margin: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+        // color: Colors.white.withValues(alpha: 0.1),
+        color: Color(0xFF1A5D32),
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: Color(0xff8b6914), width: 5),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Round info
-          Text(
-            'Round ${gameState.currentRoundNumber}',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Dealer info
-          Text(
-            'Dealer: ${GameConstants.defaultPlayerNames[gameState.currentDealer]}',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: Colors.white70,
-              fontSize: 14,
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Power suit display
+          // Power card display at the top
           if (gameState.currentRound != null) ...[
-            Text(
-              'Power Card: ${gameState.currentRound!.powerCard.displayString}',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.white,
-                fontSize: 20,
+            Container(
+              padding: const EdgeInsets.all(4.0), // Reduced from 8.0
+              child: Column(
+                children: [
+                  Text(
+                    'Power Card',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: Colors.white70,
+                      fontSize: 10, // Reduced from 12
+                    ),
+                  ),
+                  const SizedBox(height: 2), // Reduced from 4
+                  PlayingCardWidget(
+                    card: gameState.currentRound!.powerCard,
+                    faceUp: true,
+                    width: 40,
+                    height: 56,
+                  ),
+                ],
               ),
             ),
-
-            const SizedBox(height: 16),
+            const SizedBox(height: 4), // Reduced from 8
           ],
 
+          // Current trick display in the center
+          if (gameState.currentRound != null &&
+              gameState.currentRound!.currentTrick.isNotEmpty) ...[
+            Expanded(
+              flex: 3,
+              child: Container(
+                padding: const EdgeInsets.all(4.0), // Reduced from 8.0
+                child: Column(
+                  children: [
+                    Text(
+                      'Current Trick',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: Colors.white70,
+                        fontSize: 10, // Reduced from 12
+                      ),
+                    ),
+                    const SizedBox(height: 2), // Reduced from 4
+                    SizedBox(
+                      height: 140, // Reduced from 120
+                      child: Column(
+                        children: [
+                          // First row (cards 0 and 1)
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                // Card 0 (top-left)
+                                _buildTrickCard(gameState, 0),
+                                // Card 1 (top-right)
+                                _buildTrickCard(gameState, 1),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          // Second row (cards 2 and 3)
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                // Card 2 (bottom-left)
+                                _buildTrickCard(gameState, 2),
+                                // Card 3 (bottom-right)
+                                _buildTrickCard(gameState, 3),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 4), // Reduced from 8
+          ],
+
+          Expanded(
+            flex: 1,
+            child: Column(
+              children: [
+                // Round info
+                Text(
+                  'Round ${gameState.currentRoundNumber}',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18, // Reduced from default
+                  ),
+                ),
+
+                const SizedBox(height: 4), // Reduced from 8
+                // Dealer info
+                Text(
+                  'Dealer: ${GameConstants.defaultPlayerNames[gameState.currentDealer]}',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Colors.white70,
+                    fontSize: 12, // Reduced from 14
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 8), // Reduced from 16
           // Game controls
           if (!gameState.isBiddingEnabled) ...[
             // Show "Start Round" button to enable bidding
@@ -289,6 +366,10 @@ class _GameScreenState extends State<GameScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Color(GameConstants.greenFeltColor),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ), // Reduced padding
               ),
               child: const Text('Start Round'),
             ),
@@ -306,19 +387,54 @@ class _GameScreenState extends State<GameScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Color(GameConstants.greenFeltColor),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ), // Reduced padding
               ),
               child: const Text('Complete Round'),
             ),
           ] else ...[
             Text(
               'Playing tricks...',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(color: Colors.white70),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Colors.white70,
+                fontSize: 14, // Reduced from default
+              ),
             ),
           ],
         ],
       ),
+    );
+  }
+
+  Widget _buildTrickCard(GameState gameState, int cardIndex) {
+    if (cardIndex >= gameState.currentRound!.currentTrick.length) {
+      // Show empty space for cards not yet played
+      return Container(
+        width: 40,
+        height: 56,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        ),
+        child: const Center(
+          child: Icon(Icons.add, color: Colors.white54, size: 20),
+        ),
+      );
+    }
+
+    final card = gameState.currentRound!.currentTrick[cardIndex];
+    final playerIndex = gameState.currentRound!.currentTrickPlayers[cardIndex];
+    final playerName = GameConstants.defaultPlayerNames[playerIndex];
+
+    return PlayingCardWidget(
+      card: card,
+      faceUp: true,
+      width: 40,
+      height: 56,
+      playerName: playerName,
     );
   }
 

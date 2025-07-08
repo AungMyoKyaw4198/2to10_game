@@ -81,7 +81,8 @@ class _PlayerBoxState extends State<PlayerBox> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Padding(
+        return Container(
+          width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -105,8 +106,10 @@ class _PlayerBoxState extends State<PlayerBox> {
                 ),
               ),
               const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Wrap(
+                direction: Axis.horizontal,
+                alignment: WrapAlignment.center,
+                runSpacing: 5,
                 children: [
                   for (int i = 0; i < hand.length; i++)
                     Padding(
@@ -154,7 +157,7 @@ class _PlayerBoxState extends State<PlayerBox> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildPlayerInfo(context),
-        const SizedBox(height: 8),
+        const SizedBox(height: 5),
         _buildCardCount(context),
         if (isVertical)
           Flexible(
@@ -199,49 +202,107 @@ class _PlayerBoxState extends State<PlayerBox> {
           ),
 
           // const SizedBox(height: 4),
-
-          // Bid
-          Text(
-            widget.player.currentBid >= 0
-                ? 'Bid: ${widget.player.currentBid}'
-                : 'Not Bid',
-            style: TextStyle(
-              color: isPlayerTurn ? Colors.yellow : Colors.white70,
-              fontSize: 12,
-            ),
-          ),
-
-          // Score
-          Text(
-            'Score: ${widget.player.score}',
-            style: TextStyle(
-              color: isPlayerTurn ? Colors.yellow : Colors.white70,
-              fontSize: 12,
-            ),
-          ),
-
-          // Bags with warning
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Bags: ${widget.player.bags}',
-                style: TextStyle(
-                  color:
-                      widget.player.hasBagWarning
-                          ? Colors.red
-                          : (isPlayerTurn ? Colors.yellow : Colors.white70),
-                  fontSize: 12,
-                  fontWeight:
-                      widget.player.hasBagWarning ? FontWeight.bold : null,
+          if (widget.playerIndex == 0 || widget.playerIndex == 2)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.player.currentBid >= 0
+                      ? 'Bid: ${widget.player.currentBid}'
+                      : 'Not Bid',
+                  style: TextStyle(
+                    color: isPlayerTurn ? Colors.yellow : Colors.white70,
+                    fontSize: 12,
+                  ),
                 ),
-              ),
-              if (widget.player.hasBagWarning) ...[
-                const SizedBox(width: 4),
-                const Icon(Icons.warning, color: Colors.red, size: 12),
+                // Score
+                Text(
+                  ' | Score: ${widget.player.score}',
+                  style: TextStyle(
+                    color: isPlayerTurn ? Colors.yellow : Colors.white70,
+                    fontSize: 12,
+                  ),
+                ),
+                // Bags with warning
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      ' | Bags: ${widget.player.bags}',
+                      style: TextStyle(
+                        color:
+                            widget.player.hasBagWarning
+                                ? Colors.red
+                                : (isPlayerTurn
+                                    ? Colors.yellow
+                                    : Colors.white70),
+                        fontSize: 12,
+                        fontWeight:
+                            widget.player.hasBagWarning
+                                ? FontWeight.bold
+                                : null,
+                      ),
+                    ),
+                    if (widget.player.hasBagWarning) ...[
+                      const SizedBox(width: 4),
+                      const Icon(Icons.warning, color: Colors.red, size: 12),
+                    ],
+                  ],
+                ),
               ],
-            ],
-          ),
+            ),
+          if (widget.playerIndex == 1 || widget.playerIndex == 3)
+            Column(
+              children: [
+                // Bid
+                Text(
+                  widget.player.currentBid >= 0
+                      ? 'Bid: ${widget.player.currentBid}'
+                      : 'Not Bid',
+                  style: TextStyle(
+                    color: isPlayerTurn ? Colors.yellow : Colors.white70,
+                    fontSize: 12,
+                  ),
+                ),
+
+                // Score
+                Text(
+                  'Score: ${widget.player.score}',
+                  style: TextStyle(
+                    color: isPlayerTurn ? Colors.yellow : Colors.white70,
+                    fontSize: 12,
+                  ),
+                ),
+
+                // Bags with warning
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Bags: ${widget.player.bags}',
+                      style: TextStyle(
+                        color:
+                            widget.player.hasBagWarning
+                                ? Colors.red
+                                : (isPlayerTurn
+                                    ? Colors.yellow
+                                    : Colors.white70),
+                        fontSize: 12,
+                        fontWeight:
+                            widget.player.hasBagWarning
+                                ? FontWeight.bold
+                                : null,
+                      ),
+                    ),
+                    if (widget.player.hasBagWarning) ...[
+                      const SizedBox(width: 4),
+                      const Icon(Icons.warning, color: Colors.red, size: 12),
+                    ],
+                  ],
+                ),
+              ],
+            ),
 
           // Perfect streak indicator
           if (hasPerfectStreak || hasImmaculateStreak) ...[
@@ -275,17 +336,20 @@ class _PlayerBoxState extends State<PlayerBox> {
           if (isPlayerTurn) ...[
             const SizedBox(height: 4),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+              width: 70,
+              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
               decoration: BoxDecoration(
                 color: Colors.yellow,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Text(
-                'YOUR TURN',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
+              child: Center(
+                child: const Text(
+                  'YOUR TURN',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),

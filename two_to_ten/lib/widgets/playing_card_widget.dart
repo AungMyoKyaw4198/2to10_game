@@ -97,36 +97,30 @@ class PlayingCardWidget extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (playerName != null)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 2),
-            child: Text(
-              playerName!,
-              style: const TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                shadows: [Shadow(color: Colors.white, blurRadius: 2)],
-              ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
+          Text(
+            playerName!,
+            style: const TextStyle(
+              color: Colors.white24,
+              fontWeight: FontWeight.bold,
+              fontSize: 8, // Further reduced from 8
+              shadows: [Shadow(color: Colors.white, blurRadius: 2)],
             ),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         cardWidget,
         if (playerStats != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Text(
-              playerStats!,
-              style: const TextStyle(
-                color: Colors.black87,
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-              ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
+          Text(
+            playerStats!,
+            style: const TextStyle(
+              color: Colors.black87,
+              fontSize: 5, // Further reduced from 7
+              fontWeight: FontWeight.w500,
             ),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
       ],
     );

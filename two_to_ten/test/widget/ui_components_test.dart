@@ -275,14 +275,14 @@ void main() {
       expect(find.text('Start Round'), findsOneWidget);
 
       // Should show power card immediately
-      expect(find.textContaining('Power Card:'), findsOneWidget);
+      expect(find.textContaining('Power Card'), findsOneWidget);
 
       // Tap Start Round button
       await tester.tap(find.text('Start Round'));
       await tester.pumpAndSettle();
 
       // Should still show power card
-      expect(find.textContaining('Power Card:'), findsOneWidget);
+      expect(find.textContaining('Power Card'), findsOneWidget);
 
       // Should show bid dialog after bidding is enabled
       expect(find.text('Alex - Enter your bid'), findsOneWidget);
