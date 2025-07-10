@@ -92,7 +92,7 @@ This document records all test cases covered by the current test suite. For each
   - *Actual*: ✅ Pass
 - **Zero bid scoring - perfect**
   - *Test*: 0 bid, 0 tricks.
-  - *Expected*: +10 points.
+  - *Expected*: +0 points.
   - *Actual*: ✅ Pass
 - **Zero bid scoring - bags only**
   - *Test*: 0 bid, >0 tricks.

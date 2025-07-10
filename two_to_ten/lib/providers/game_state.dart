@@ -256,7 +256,7 @@ class GameState extends ChangeNotifier {
 
       if (bid == 0) {
         if (tricksWon == 0) {
-          roundScore = 10; // Perfect 0 bid
+          roundScore = 0; // Perfect 0 bid - no points
           isImmaculate = true;
         } else {
           roundScore = tricksWon; // Bags only

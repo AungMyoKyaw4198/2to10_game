@@ -122,6 +122,19 @@
 ## 🔧 Recent Fixes & Improvements (2024-12-19)
 
 ### **UI/UX Improvements:**
+- ✅ Moved power card display to top of center game area
+- ✅ Changed current trick cards to 2x2 grid layout
+- ✅ Reduced font sizes and spacing to fix overflow errors
+- ✅ Fixed PlayingCardWidget overflow issues
+
+### **Scoring System Fix:**
+- ✅ **CRITICAL FIX**: Updated bid 0 scoring logic to match client requirements
+  - Changed from +10 points to +0 points for successful bid of 0
+  - Updated bid screen explanation text
+  - Updated all test cases to reflect correct scoring
+  - Updated PRD documentation
+
+### **UI/UX Improvements:**
 - [x] Fixed BidInputWidget dialog not closing after last player bids
 - [x] Fixed setState called after dispose error
 - [x] Added proper mounted checks and lifecycle management

@@ -288,7 +288,7 @@ class _BidInputWidgetState extends State<BidInputWidget> {
 
   String _getBidExplanation() {
     if (_currentBid == 0) {
-      return 'Bid 0: Win 0 tricks = +10 points\nWin any tricks = +1 per trick (bags)';
+      return 'Bid 0: Win 0 tricks = +0 points\nWin any tricks = +1 per trick (bags)';
     } else {
       return 'Bid $_currentBid: Hit exactly = +${_currentBid * 10} points\nOverbid = +${_currentBid * 10} + bags\nUnderbid = -${_currentBid * 10} points';
     }

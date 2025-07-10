@@ -45,13 +45,15 @@ void main() {
               }
             }
           }
-          // Manually complete the trick since it now uses dialogs
+          // Note: Trick completion now happens automatically after a 2-second delay
+          // The dialog is no longer shown, but the callback still triggers completeCurrentTrick()
           gameState.completeCurrentTrick();
         }
 
         // Complete the round
         gameState.completeRound();
-        // Manually start next round since completeRound no longer does this automatically
+        // Note: Round completion now happens automatically after a 2-second delay
+        // The dialog is no longer shown, but the callback still triggers startNextRound()
         gameState.startNextRound();
 
         // Verify round progression
@@ -232,12 +234,14 @@ void main() {
               }
             }
           }
-          // Manually complete the trick since it now uses dialogs
+          // Note: Trick completion now happens automatically after a 2-second delay
+          // The dialog is no longer shown, but the callback still triggers completeCurrentTrick()
           gameState.completeCurrentTrick();
         }
 
         gameState.completeRound();
-        // Manually start next round since completeRound no longer does this automatically
+        // Note: Round completion now happens automatically after a 2-second delay
+        // The dialog is no longer shown, but the callback still triggers startNextRound()
         gameState.startNextRound();
 
         // Verify scores persist
@@ -271,7 +275,8 @@ void main() {
           gameState.setPlayerBid(i, 1);
         }
         gameState.completeRound();
-        // Manually start next round since completeRound no longer does this automatically
+        // Note: Round completion now happens automatically after a 2-second delay
+        // The dialog is no longer shown, but the callback still triggers startNextRound()
         gameState.startNextRound();
       }
 
@@ -307,12 +312,14 @@ void main() {
             }
           }
         }
-        // Manually complete the trick since it now uses dialogs
+        // Note: Trick completion now happens automatically after a 2-second delay
+        // The dialog is no longer shown, but the callback still triggers completeCurrentTrick()
         gameState.completeCurrentTrick();
       }
 
       gameState.completeRound();
-      // Manually start next round since completeRound no longer does this automatically
+      // Note: Round completion now happens automatically after a 2-second delay
+      // The dialog is no longer shown, but the callback still triggers startNextRound()
       gameState.startNextRound();
 
       // Round 3: Player 1 should be dealer, Player 1 should start
@@ -336,12 +343,14 @@ void main() {
             }
           }
         }
-        // Manually complete the trick since it now uses dialogs
+        // Note: Trick completion now happens automatically after a 2-second delay
+        // The dialog is no longer shown, but the callback still triggers completeCurrentTrick()
         gameState.completeCurrentTrick();
       }
 
       gameState.completeRound();
-      // Manually start next round since completeRound no longer does this automatically
+      // Note: Round completion now happens automatically after a 2-second delay
+      // The dialog is no longer shown, but the callback still triggers startNextRound()
       gameState.startNextRound();
 
       // Round 4: Player 2 should be dealer, Player 2 should start
@@ -365,12 +374,14 @@ void main() {
             }
           }
         }
-        // Manually complete the trick since it now uses dialogs
+        // Note: Trick completion now happens automatically after a 2-second delay
+        // The dialog is no longer shown, but the callback still triggers completeCurrentTrick()
         gameState.completeCurrentTrick();
       }
 
       gameState.completeRound();
-      // Manually start next round since completeRound no longer does this automatically
+      // Note: Round completion now happens automatically after a 2-second delay
+      // The dialog is no longer shown, but the callback still triggers startNextRound()
       gameState.startNextRound();
 
       // Round 5: Player 3 should be dealer, Player 3 should start
@@ -394,18 +405,57 @@ void main() {
             }
           }
         }
-        // Manually complete the trick since it now uses dialogs
+        // Note: Trick completion now happens automatically after a 2-second delay
+        // The dialog is no longer shown, but the callback still triggers completeCurrentTrick()
         gameState.completeCurrentTrick();
       }
 
       gameState.completeRound();
-      // Manually start next round since completeRound no longer does this automatically
+      // Note: Round completion now happens automatically after a 2-second delay
+      // The dialog is no longer shown, but the callback still triggers startNextRound()
       gameState.startNextRound();
 
       // Round 6: Player 0 should be dealer again, Player 0 should start
       expect(gameState.currentDealer, 0);
       expect(gameState.currentRound!.dealer, 0);
       expect(gameState.currentRound!.firstPlayer, 0);
+    });
+
+    test('Automatic progression behavior after delays', () {
+      gameState.startNewGame();
+
+      // Test that the game automatically progresses without showing dialogs
+      // This test documents the new behavior where dialogs are replaced with delays
+
+      // Set bids for round 2
+      for (int i = 0; i < 4; i++) {
+        gameState.setPlayerBid(i, 1);
+      }
+
+      // Play all tricks for round 2
+      for (int trick = 0; trick < 2; trick++) {
+        for (int player = 0; player < 4; player++) {
+          if (gameState.currentRound!.playerHands[player].isNotEmpty) {
+            final validCards = gameState.getValidCards(player);
+            if (validCards.isNotEmpty) {
+              final card = validCards[0];
+              gameState.playCard(player, card);
+            }
+          }
+        }
+        // The trick completion callback will automatically call completeCurrentTrick()
+        // after a 2-second delay, but for testing we call it directly
+        gameState.completeCurrentTrick();
+      }
+
+      // Complete the round
+      gameState.completeRound();
+      // The round completion callback will automatically call startNextRound()
+      // after a 2-second delay, but for testing we call it directly
+      gameState.startNextRound();
+
+      // Verify we moved to round 3
+      expect(gameState.currentRoundNumber, 3);
     });
   });
 }

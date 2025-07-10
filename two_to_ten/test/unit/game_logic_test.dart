@@ -690,7 +690,7 @@ void main() {
       int roundScore;
       if (bid == 0) {
         if (tricksWon == 0) {
-          roundScore = 10; // Perfect 0 bid
+          roundScore = 0; // Perfect 0 bid - no points
         } else {
           roundScore = tricksWon; // Bags only
         }
@@ -698,7 +698,7 @@ void main() {
         roundScore = 0; // Should not happen
       }
 
-      expect(roundScore, 10); // Perfect 0 bid
+      expect(roundScore, 0); // Perfect 0 bid - no points
     });
 
     test('Zero bid scoring - bags only', () {
@@ -844,7 +844,7 @@ void main() {
       int roundScore;
       if (bid == 0) {
         if (tricksWon == 0) {
-          roundScore = 10; // Perfect 0 bid
+          roundScore = 0; // Perfect 0 bid - no points
         } else {
           roundScore = tricksWon; // Bags only
         }
@@ -852,7 +852,7 @@ void main() {
         roundScore = 0; // Should not happen
       }
 
-      expect(roundScore, 10); // Perfect 0 bid
+      expect(roundScore, 0); // Perfect 0 bid - no points
     });
 
     test('All players overbid logic', () {

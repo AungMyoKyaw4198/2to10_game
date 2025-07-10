@@ -58,7 +58,7 @@
 - If overbid: +10 × bid +1 per extra trick (bag).
 - Every 5 bags = –50 points (bag out penalty).
 - Bids of 0:
-  - If win 0 tricks: ✅ **+10 points**
+  - If win 0 tricks: ✅ **+0 points**
   - If win any tricks: +1 point per trick (bags only).
 
 ### 🏆 Bonuses

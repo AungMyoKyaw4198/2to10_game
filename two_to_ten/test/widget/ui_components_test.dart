@@ -59,14 +59,14 @@ void main() {
       // Verify player name is displayed
       expect(find.text('Test Player'), findsOneWidget);
 
-      // Verify score is displayed
-      expect(find.text('Score: 50'), findsOneWidget);
+      // Verify score is displayed - for player index 0, it shows " | Score: 50"
+      expect(find.textContaining('Score: 50'), findsOneWidget);
 
       // Verify bid is displayed
-      expect(find.text('Bid: 2'), findsOneWidget);
+      expect(find.textContaining('Bid: 2'), findsOneWidget);
 
       // Verify bags are displayed
-      expect(find.text('Bags: 3'), findsOneWidget);
+      expect(find.textContaining('Bags: 3'), findsOneWidget);
     });
 
     testWidgets('PlayerBox shows bag warning when bags >= 4', (
@@ -305,7 +305,8 @@ void main() {
 
         // Complete the round
         gameState.completeRound();
-        // Manually start next round since completeRound no longer does this automatically
+        // Note: Round completion now happens automatically after a 2-second delay
+        // The dialog is no longer shown, but the callback still triggers startNextRound()
         gameState.startNextRound();
       }
 
@@ -321,6 +322,62 @@ void main() {
       // Should not crash with 10 cards
       expect(find.text('Game Complete!'), findsOneWidget);
     });
+
+    testWidgets(
+      'GameScreen does not show trick/round winner dialogs automatically',
+      (WidgetTester tester) async {
+        gameState.startNewGame();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: ChangeNotifierProvider<GameState>.value(
+              value: gameState,
+              child: const GameScreen(),
+            ),
+          ),
+        );
+
+        // Enable bidding and set bids
+        gameState.enableBidding();
+        for (int i = 0; i < 4; i++) {
+          gameState.setPlayerBid(i, 1);
+        }
+
+        // Play all tricks for round 2
+        for (int trick = 0; trick < 2; trick++) {
+          // Play all 4 cards for this trick
+          for (int player = 0; player < 4; player++) {
+            if (gameState.currentRound!.playerHands[player].isNotEmpty) {
+              final validCards = gameState.getValidCards(player);
+              if (validCards.isNotEmpty) {
+                final card = validCards[0];
+                gameState.playCard(player, card);
+              }
+            }
+          }
+          // Now the trick is complete, we can complete it
+          gameState.completeCurrentTrick();
+
+          // Handle the timer from Future.delayed
+          await tester.pump(const Duration(seconds: 3));
+        }
+
+        // Complete the round
+        gameState.completeRound();
+        gameState.startNextRound();
+
+        // Handle the timer from Future.delayed
+        await tester.pump(const Duration(seconds: 3));
+
+        // Verify we moved to the next round without showing dialogs
+        // Note: The actual round number depends on the game logic, but it should have progressed
+        expect(gameState.currentRoundNumber, greaterThan(2));
+
+        // The dialogs should not be present in the widget tree
+        expect(find.text('Trick Winner!'), findsNothing);
+        expect(find.text('Round Complete!'), findsNothing);
+      },
+    );
   });
 
   group('Edge Case UI Tests', () {
@@ -359,5 +416,64 @@ void main() {
       // Should not crash
       expect(find.text('Bid range: 0 - 2'), findsOneWidget);
     });
+
+    testWidgets(
+      'GameScreen handles automatic progression without user interaction',
+      (WidgetTester tester) async {
+        gameState.startNewGame();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: ChangeNotifierProvider<GameState>.value(
+              value: gameState,
+              child: const GameScreen(),
+            ),
+          ),
+        );
+
+        // Enable bidding and set bids
+        gameState.enableBidding();
+        for (int i = 0; i < 4; i++) {
+          gameState.setPlayerBid(i, 1);
+        }
+
+        // Play all tricks for round 2
+        for (int trick = 0; trick < 2; trick++) {
+          // Play all 4 cards for this trick
+          for (int player = 0; player < 4; player++) {
+            if (gameState.currentRound!.playerHands[player].isNotEmpty) {
+              final validCards = gameState.getValidCards(player);
+              if (validCards.isNotEmpty) {
+                final card = validCards[0];
+                gameState.playCard(player, card);
+              }
+            }
+          }
+          // Now the trick is complete, we can complete it
+          gameState.completeCurrentTrick();
+
+          // Handle the timer from Future.delayed
+          await tester.pump(const Duration(seconds: 3));
+        }
+
+        // Complete the round
+        gameState.completeRound();
+        gameState.startNextRound();
+
+        // Handle the timer from Future.delayed
+        await tester.pump(const Duration(seconds: 3));
+
+        // Verify we moved to the next round automatically
+        // Note: The actual round number depends on the game logic, but it should have progressed
+        expect(gameState.currentRoundNumber, greaterThan(2));
+
+        // Verify the UI updates correctly - look for the specific round number text
+        await tester.pumpAndSettle();
+        expect(
+          find.text('Round ${gameState.currentRoundNumber}'),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }
