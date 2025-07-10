@@ -54,4 +54,11 @@ class GameConstants {
   static const int heartsColor = 0xFFD32F2F;
   static const int diamondsColor = 0xFFD32F2F;
   static const int clubsColor = 0xFF000000;
+
+  // TODO: Remove this once testing is done
+  // Development/Testing Settings
+  static const bool showAllCardsDuringBidding =
+      true; // Set to false for production
+  // When true: All players' cards are visible during bidding phase (for testing)
+  // When false: Cards are face down during bidding phase (for production)
 }

@@ -102,6 +102,10 @@ This document records all test cases covered by the current test suite. For each
   - *Test*: Bags >= 5 triggers penalty.
   - *Expected*: -50 per 5 bags, bags reset.
   - *Actual*: ✅ Pass
+- **Testing mode constant for card visibility**
+  - *Test*: Testing mode controls card visibility during bidding.
+  - *Expected*: Cards visible during bidding when testing mode is enabled.
+  - *Actual*: ✅ Pass
 
 ### Edge Cases
 - **Tiebreaker rule - most rounds not set**

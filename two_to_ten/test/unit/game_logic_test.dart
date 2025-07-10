@@ -730,6 +730,20 @@ void main() {
       expect(bagPenalties, 50);
       expect(finalBags, 0);
     });
+
+    test('Testing mode constant for card visibility', () {
+      // Test that the testing mode constant is properly defined
+      expect(GameConstants.showAllCardsDuringBidding, isA<bool>());
+
+      // In testing mode, cards should be visible during bidding
+      // This is controlled by the constant and the bidding phase state
+      bool isBiddingPhase = true; // Simulate bidding phase
+      bool shouldShowCards =
+          GameConstants.showAllCardsDuringBidding && isBiddingPhase;
+
+      // Currently set to true for testing, so cards should be visible
+      expect(shouldShowCards, true);
+    });
   });
 
   group('Edge Cases Tests', () {

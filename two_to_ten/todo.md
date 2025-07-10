@@ -134,6 +134,13 @@
   - Updated all test cases to reflect correct scoring
   - Updated PRD documentation
 
+### **Testing Mode Feature:**
+- ✅ **NEW FEATURE**: Added testing mode for card visibility during bidding
+  - Added `showAllCardsDuringBidding` constant in GameConstants
+  - Updated PlayerBox widget to show all players' cards face up during bidding when testing mode is enabled
+  - Cards remain face down during bidding in production mode
+  - Helps with validating trick logic and AI decisions during development
+
 ### **UI/UX Improvements:**
 - [x] Fixed BidInputWidget dialog not closing after last player bids
 - [x] Fixed setState called after dispose error

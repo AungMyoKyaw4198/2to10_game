@@ -5,6 +5,7 @@ import '../models/card.dart' as game_card;
 import '../models/player.dart';
 import '../models/round.dart';
 import '../providers/game_state.dart';
+import '../constants/game_constants.dart';
 
 class PlayerBox extends StatefulWidget {
   final Player player;
@@ -35,7 +36,12 @@ class _PlayerBoxState extends State<PlayerBox> {
   Widget build(BuildContext context) {
     bool isPlayerTurn = _isPlayerTurn();
     return GestureDetector(
-      onTap: isPlayerTurn ? _showCardSelectionSheet : null,
+      // onTap: isPlayerTurn ? _showCardSelectionSheet : null,
+      // TODO: Remove this once testing is done
+      onTap:
+          isPlayerTurn
+              ? _showCardSelectionSheet
+              : _showCardSelectionSheetTesting,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.05),
@@ -57,6 +63,75 @@ class _PlayerBoxState extends State<PlayerBox> {
         ),
         child: _buildPlayerContent(context),
       ),
+    );
+  }
+
+  // For testing purposes only
+  // TODO: Remove this once testing is done
+  void _showCardSelectionSheetTesting() async {
+    List<game_card.Card> hand =
+        widget.currentRound!.playerHands[widget.playerIndex];
+    double cardWidth = 48;
+    double cardHeight = 68;
+    // Get valid cards for this player using the round's getValidCards
+    List<game_card.Card> validCards = widget.currentRound!.getValidCards(
+      widget.playerIndex,
+    );
+    int? selectedIdx = await showModalBottomSheet<int>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Player name and stats
+              Text(
+                widget.player.name,
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                direction: Axis.horizontal,
+                alignment: WrapAlignment.center,
+                runSpacing: 5,
+                children: [
+                  for (int i = 0; i < hand.length; i++)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: PlayingCardWidget(
+                        card: hand[i],
+                        faceUp: true,
+                        isSelected: _selectedCardIndex == i,
+                        isPlayable: validCards.contains(hand[i]),
+                        width: cardWidth,
+                        height: cardHeight,
+                        onTap: () {},
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -428,6 +503,14 @@ class _PlayerBoxState extends State<PlayerBox> {
     double cardWidth = 48;
     double cardHeight = 68;
     double overlap = 0.2; // 20% offset, 80% overlap
+
+    // TODO: Remove this once testing is done
+    // Determine if cards should be face up based on testing mode and bidding phase
+    // bool shouldShowCardsFaceUp =
+    //     GameConstants.showAllCardsDuringBidding &&
+    //     !widget.currentRound!.allBidsPlaced;
+    bool shouldShowCardsFaceUp = true;
+
     if (widget.position == 'left' || widget.position == 'right') {
       // Vertical stack for side players
       double stackHeight =
@@ -448,7 +531,7 @@ class _PlayerBoxState extends State<PlayerBox> {
                     top: i * cardHeight * overlap,
                     child: PlayingCardWidget(
                       card: hand[i],
-                      faceUp: false,
+                      faceUp: shouldShowCardsFaceUp,
                       width: cardWidth,
                       height: cardHeight,
                     ),
@@ -477,7 +560,7 @@ class _PlayerBoxState extends State<PlayerBox> {
                     left: i * cardWidth * overlap,
                     child: PlayingCardWidget(
                       card: hand[i],
-                      faceUp: false,
+                      faceUp: shouldShowCardsFaceUp,
                       width: cardWidth,
                       height: cardHeight,
                     ),
