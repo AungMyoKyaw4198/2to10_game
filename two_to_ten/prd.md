@@ -44,6 +44,8 @@
 - Card visuals include suit and rank (e.g., "♠A", "♥10").
 - Hands are displayed on-screen at the start of the round.
 - Trick plays are shown with animations or flipping visuals (basic).
+- **Testing Mode**: All players' cards are visible during bidding phase for development/testing.
+- **Production Mode**: Cards are face down during bidding phase (normal gameplay).
 
 ### 🤖 Trick Tracking
 - Trick resolution is **automatic**:
@@ -119,6 +121,21 @@ If players are tied after Round 10, the winner is the player with the most round
 - Round starts → cards dealt → bids entered → tricks played → scoring → next round
 - Cards are removed from hand after play
 - Score and bags are tracked persistently
+
+---
+
+## Development & Testing Features
+
+### 🧪 Testing Mode
+- **Card Visibility Control**: Toggle to show/hide all players' cards during bidding phase
+- **Development Mode**: All cards visible for testing trick logic and AI decisions
+- **Production Mode**: Cards face down during bidding (normal gameplay)
+- **Easy Toggle**: Single constant controls the entire testing mode
+
+### 🔧 Configuration
+- Testing mode controlled by `showAllCardsDuringBidding` constant in `GameConstants`
+- Set to `true` for development/testing
+- Set to `false` for production release
 
 ---
 
